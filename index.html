@@ -145,7 +145,8 @@
             
             function createRoom() {
                 title = prompt('생성하고 싶은 방제목을 입력하세요');
-                if (title === null) {
+                title = title.trim();
+                if (title === undefined || title === null || title.length === 0) {
                     return;
                 }
 
@@ -156,7 +157,8 @@
 
             function joinRoom() {
                 title = prompt('들어가고 싶은 방제목을 입력하세요');
-                if (title === null) {
+                title.trim();
+                if (title === undefined || title === null || title.length === 0) {
                     return;
                 }
 
