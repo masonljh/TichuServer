@@ -1,0 +1,176 @@
+<html>
+    <head>
+        <meta charset=”utf-8">
+        <title>Tichu</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font: 13px Helvetica, Arial;
+            }
+            
+            form {
+                background: #000;
+                padding: 3px;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+            }
+            
+            form input {
+                border: 0;
+                padding: 10px;
+                width: 90%;
+                margin-right: .5%;
+            }
+            
+            form button {
+                width: 9%;
+                background: rgb(130, 224, 255);
+                border: none;
+                padding: 10px;
+            }
+
+            #container {
+                display: block;
+                padding: 50px;
+            }
+            
+            #messages {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+            
+            #messages li {
+                padding: 5px 10px;
+            }
+            
+            #messages li:nth-child(odd) {
+                background: #eee;
+            }
+        </style>
+    </head>
+    <body>
+        <h5 id="title">로비</h5>
+        <button onclick="createRoom()">방 생성</button>
+        <button onclick="joinRoom()">방 참여</button>
+        <button onclick="leaveRoom()">방 나가기</button>
+        <div id="container">
+            <ul id="messages"></ul>
+        </div>
+        <form action="">
+            <input id="m" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script>
+            var name;
+            var title;
+            var socket;
+            var cachedRooms;
+            $(() => {
+                name = prompt('What your name');
+                socket = io();
+                socket.emit('setName', name);
+
+                socket.emit('getRoomList', '');
+
+                // $('select').change(() => {
+                //     socket.emit('leaveRoom', title, name);
+                //     num++;
+                //     num = num % 2;
+                //     socket.emit('joinRoom', title, name);
+                // });
+                
+                $('form').submit(() => {
+                    socket.emit('chat message', title, name, $('#m').val());
+                    $('#m').val('');
+                    return false;
+                });
+                
+                socket.on('chat message', (name, msg) => {
+                    $('#messages').append($('<li>').text(name + '  :  ' +msg));
+                    scrollToBottom();
+                });
+                
+                socket.on('leave', (title, name) => {
+                    $('#messages').append($('<li>').text(name + '    leaved '+ title + ' :('));
+                });
+                
+                socket.on('join', (title, name) => {
+                    $('#messages').append($('<li>').text(name + '    joined '+ title + ':)'));
+                });
+
+                socket.on('roomList', (rooms) => {
+                    if (title !== '로비') {
+                        return;
+                    }
+
+                    cachedRooms = rooms;
+                    for (var idx in cachedRooms) {
+                        var room = cachedRooms[idx];
+                        $('#messages').append($('<li>').text(room.title + '             (' + room.personCnt + " / " + room.maxPersonCnt + ")"));
+                    }
+                });
+
+                socket.on('room error', (code) => {
+                    switch(code) {
+                        case 1001:
+                            alert("이미 해당 방이 있습니다.");
+                            updateTitle();
+                            clearMsgs();
+                            break;
+                        case 1002:
+                            alert("이미 해당 방이 존재하지 않습니다.");
+                            title = '로비';
+                            updateTitle();
+                            clearMsgs();
+                            break;
+                    }
+
+                    alert("그냥 에러");
+                });
+            });
+            
+            function createRoom() {
+                title = prompt('생성하고 싶은 방제목을 입력하세요');
+                socket.emit('createRoom', title, name);
+                updateTitle();
+                clearMsgs();
+            }
+
+            function joinRoom() {
+                title = prompt('들어가고 싶은 방제목을 입력하세요');
+                socket.emit('joinRoom', title, name);
+                updateTitle();
+                clearMsgs();
+            }
+
+            function leaveRoom() {
+                socket.emit('leaveRoom', title, name);
+                title = '로비';
+                updateTitle();
+                clearMsgs();
+                socket.emit('getRoomList', '');
+            }
+
+            function updateTitle() {
+                $('#title').text(title);
+            }
+
+            function clearMsgs() {
+                $('#messages').html('');
+            }
+
+            function scrollToBottom() {
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        </script>
+    </body>
+</html>

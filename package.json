@@ -1,0 +1,24 @@
+{
+  "name": "tichuserver",
+  "version": "1.0.0",
+  "description": "티츄 서버입니다.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masonljh/TichuServer.git"
+  },
+  "author": "Jong-hyo Lee",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/masonljh/TichuServer/issues"
+  },
+  "homepage": "https://github.com/masonljh/TichuServer#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
+  }
+}
