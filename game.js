@@ -32,7 +32,7 @@ method.startRound = function() {
 };
 
 method.raiseCards = function(id, cards) {
-    
+    getCurrentRound().raiseCards(id, cards);
 };
 
 module.exports = Game;
