@@ -75,7 +75,12 @@
             var socket;
             var cachedRooms;
             $(() => {
-                name = prompt('What your name');
+                var inputName
+                while (inputName === undefined || inputName === null || inputName.trim().length === 0) {
+                    inputName = prompt('네 이름이 뭐니?');
+                }
+                name = inputName;
+
                 socket = io();
                 socket.emit('setName', name);
 
@@ -140,6 +145,10 @@
             
             function createRoom() {
                 title = prompt('생성하고 싶은 방제목을 입력하세요');
+                if (title === null) {
+                    return;
+                }
+
                 socket.emit('createRoom', title, name);
                 updateTitle();
                 clearMsgs();
@@ -147,6 +156,10 @@
 
             function joinRoom() {
                 title = prompt('들어가고 싶은 방제목을 입력하세요');
+                if (title === null) {
+                    return;
+                }
+
                 socket.emit('joinRoom', title, name);
                 updateTitle();
                 clearMsgs();
