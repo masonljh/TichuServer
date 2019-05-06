@@ -10,7 +10,7 @@ function Room(title, id) {
     this.aCnt = 1;
     this.bCnt = 0;
     this.state = 0;     // 0이면 대기, 1이면 게임 중, 2이면 게임 끝난 후
-    console.log("Room constructor called by " + id);
+    // console.log("Room constructor called by " + id);
 }
 
 method.getUserCnt = function() {
@@ -40,6 +40,10 @@ method.isNotEmpty = function() {
 method.joinUser = function(id) {
     if (this.checkUser(id)) {
         this.users[id].isConnecting = true;
+        return;
+    }
+
+    if (this.isFull()) {
         return;
     }
 
