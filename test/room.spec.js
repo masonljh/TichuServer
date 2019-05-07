@@ -12,10 +12,10 @@ describe('# Room Test', () => {
             var room = new Room('a', 'abc');
 
             // then
-            assert.equal('a', room.title);
-            assert.equal(1, room.getUserCnt());
-            assert.equal(true, room.checkUser('abc'));
-            assert.equal(true, room.isWaiting());
+            assert.equal(room.title, 'a');
+            assert.equal(room.getUserCnt(), 1);
+            assert.equal(room.checkUser('abc'), true);
+            assert.equal(room.isWaiting(), true);
         });
     });
 
@@ -28,7 +28,7 @@ describe('# Room Test', () => {
             var userCnt = room.getUserCnt();
             
             // then
-            assert.equal(1, userCnt);
+            assert.equal(userCnt, 1);
         });
 
         it('should return 2 when aCnt is 2 And bCnt is 0', () => {
@@ -40,7 +40,7 @@ describe('# Room Test', () => {
             var userCnt = room.getUserCnt();
             
             // then
-            assert.equal(2, userCnt);
+            assert.equal(userCnt, 2);
         });
 
         it('should return 3 when aCnt is 2 And bCnt is 1', () => {
@@ -53,7 +53,7 @@ describe('# Room Test', () => {
             var userCnt = room.getUserCnt();
             
             // then
-            assert.equal(3, userCnt);
+            assert.equal(userCnt, 3);
         });
 
         it('should return 4 when aCnt is 2 And bCnt is 2', () => {
@@ -67,7 +67,7 @@ describe('# Room Test', () => {
             var userCnt = room.getUserCnt();
             
             // then
-            assert.equal(4, userCnt);
+            assert.equal(userCnt, 4);
         });
     });
 
@@ -80,7 +80,7 @@ describe('# Room Test', () => {
             var result = room.checkUser('abcd');
 
             // then
-            assert.equal(false, result);
+            assert.equal(result, false);
         });
 
         it('should return true when user is member', () => {
@@ -91,7 +91,7 @@ describe('# Room Test', () => {
             var result = room.checkUser('abc');
 
             // then
-            assert.equal(true, result);
+            assert.equal(result, true);
         });
     });
 
@@ -104,7 +104,7 @@ describe('# Room Test', () => {
             var result = room.isWaiting();
 
             // then
-            assert.equal(true, result);
+            assert.equal(result, true);
         });
 
         it('should return false when room is not waiting', () => {
@@ -116,7 +116,7 @@ describe('# Room Test', () => {
             var result = room.isWaiting();
 
             // then
-            assert.equal(false, result);
+            assert.equal(result, false);
         });
     });
 
@@ -132,7 +132,7 @@ describe('# Room Test', () => {
             var result = room.isFull();
 
             // then
-            assert.equal(true, result);
+            assert.equal(result, true);
         });
 
         it('should return false when room is not full', () => {
@@ -143,7 +143,7 @@ describe('# Room Test', () => {
             var result = room.isFull();
 
             // then
-            assert.equal(false, result);
+            assert.equal(result, false);
         });
     });
 
@@ -158,7 +158,7 @@ describe('# Room Test', () => {
             var result = room.isStarted();
 
             // then
-            assert.equal(true, result);
+            assert.equal(result, true);
         });
 
         it('should return false when room is waiting', () => {
@@ -169,7 +169,7 @@ describe('# Room Test', () => {
             var result = room.isStarted();
 
             // then
-            assert.equal(false, result);
+            assert.equal(result, false);
         });
     });
 
@@ -182,7 +182,7 @@ describe('# Room Test', () => {
             var result = room.isNotEmpty();
 
             // then
-            assert.equal(true, result);
+            assert.equal(result, true);
         });
 
         it('should return false when room is empty', () => {
@@ -194,7 +194,7 @@ describe('# Room Test', () => {
             var result = room.isNotEmpty();
 
             // then
-            assert.equal(false, result);
+            assert.equal(result, false);
         });
     });
 
@@ -207,7 +207,7 @@ describe('# Room Test', () => {
             room.joinUser('def');
             
             // then
-            assert.equal(2, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 2);
         });
 
         it('should be room which has 3 members', () => {
@@ -219,7 +219,7 @@ describe('# Room Test', () => {
             room.joinUser('ghi');
             
             // then
-            assert.equal(3, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 3);
         });
 
         it('should be room which has 4 members', () => {
@@ -232,7 +232,7 @@ describe('# Room Test', () => {
             room.joinUser('jkl');
             
             // then
-            assert.equal(4, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 4);
         });
 
         it('should ignore when room is full', () => {
@@ -246,7 +246,7 @@ describe('# Room Test', () => {
             room.joinUser('mno');
             
             // then
-            assert.equal(4, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 4);
         });
 
         it('should update userState when room has duplicated member', () => {
@@ -261,8 +261,8 @@ describe('# Room Test', () => {
             room.joinUser('abc');
             
             // then
-            assert.equal(4, room.getUserCnt());
-            assert.equal(true, room.users['abc'].isConnecting);
+            assert.equal(room.getUserCnt(), 4);
+            assert.equal(room.users['abc'].isConnecting, true);
         });
     });
 
@@ -275,7 +275,7 @@ describe('# Room Test', () => {
             room.updateUserState('abc', false);
 
             // then
-            assert.equal(false, room.users['abc'].isConnecting);
+            assert.equal(room.users['abc'].isConnecting, false);
         });
     });
 
@@ -291,7 +291,7 @@ describe('# Room Test', () => {
             room.leaveUser('jkl');
             
             // then
-            assert.equal(3, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 3);
         });
 
         it('should be room which has 2 members', () => {
@@ -304,7 +304,7 @@ describe('# Room Test', () => {
             room.leaveUser('ghi');
             
             // then
-            assert.equal(2, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 2);
         });
 
         it('should be room which has 1 members', () => {
@@ -316,7 +316,7 @@ describe('# Room Test', () => {
             room.leaveUser('def');
             
             // then
-            assert.equal(1, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 1);
         });
 
         it('should be room which is empty', () => {
@@ -327,7 +327,7 @@ describe('# Room Test', () => {
             room.leaveUser('abc');
             
             // then
-            assert.equal(0, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 0);
         });
 
         it('should ignore when room is empty', () => {
@@ -339,7 +339,7 @@ describe('# Room Test', () => {
             room.leaveUser('abc');
             
             // then
-            assert.equal(0, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 0);
         });
 
         it('should ignore when room has not that member', () => {
@@ -353,7 +353,7 @@ describe('# Room Test', () => {
             room.leaveUser('mno');
             
             // then
-            assert.equal(4, room.getUserCnt());
+            assert.equal(room.getUserCnt(), 4);
         });
     });
 });
