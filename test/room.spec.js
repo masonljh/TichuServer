@@ -13,6 +13,7 @@ describe('# Room Test', () => {
 
             // then
             assert.equal(room.title, 'a');
+            assert.equal(room.host, 'abc');
             assert.equal(room.getUserCnt(), 1);
             assert.equal(room.checkUser('abc'), true);
             assert.equal(room.isWaiting(), true);
@@ -354,6 +355,64 @@ describe('# Room Test', () => {
             
             // then
             assert.equal(room.getUserCnt(), 4);
+        });
+    });
+
+    describe('# getNextHost', () => {
+        it('should return undefined when room is empty', () => {
+            // given
+            var room = new Room('a', 'abc');
+            room.leaveUser('abc');
+
+            // when
+            var result = room.getNextHost();
+
+            // then
+            assert.equal(result, undefined);
+        });
+
+        it('should return undefined when room is empty', () => {
+            // given
+            var room = new Room('a', 'abc');
+            room.joinUser('def');
+            room.leaveUser('abc');
+
+            // when
+            var result = room.getNextHost();
+
+            // then
+            assert.equal(result, 'def');
+        });
+    });
+
+    describe('# startGame', () => {
+        it('game should not be undefined', () => {
+            // given
+            var room = new Room('a', 'abc');
+            room.joinUser('def');
+            room.joinUser('ghi');
+            room.joinUser('jkl');
+
+            // when
+            room.startGame();
+            
+            // then
+            assert.equal(room.game !== undefined, true);
+            assert.equal(room.isStarted(), true);
+        });
+
+        it('should ignore', () => {
+            // given
+            var room = new Room('a', 'abc');
+            room.joinUser('def');
+            room.joinUser('ghi');
+
+            // when
+            room.startGame();
+            
+            // then
+            assert.equal(room.game, undefined);
+            assert.equal(room.isStarted(), false);
         });
     });
 });

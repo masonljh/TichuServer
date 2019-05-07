@@ -1,7 +1,10 @@
+const Game = require('./game');
+
 var method = Room.prototype;
 
 function Room(title, id) {
     this.title = title;
+    this.host = id;
     this.users = {};
     this.users[id] = { 
         'team' : 'a',
@@ -35,7 +38,7 @@ method.isStarted = function(id) {
 
 method.isNotEmpty = function() {
     return this.aCnt + this.bCnt > 0;
-}
+};
 
 method.joinUser = function(id) {
     if (this.checkUser(id)) {
@@ -84,6 +87,31 @@ method.leaveUser = function(id) {
 
     // console.log(this.users[id]);
     delete this.users[id];
+    this.host = this.getNextHost();
+};
+
+method.getNextHost = function() {
+    var hostId;
+    for (var id in this.users) {
+        if (!this.users[id].isConnecting) {
+            hostId = id;
+            continue;
+        }
+
+        hostId = id;
+        return hostId;
+    }
+
+    return hostId;
+};
+
+method.startGame = function() {
+    if (!this.isFull()) {
+        return;
+    }
+
+    this.game = new Game(this.users);
+    this.state = 1;
 };
 
 module.exports = Room;

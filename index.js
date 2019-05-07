@@ -7,19 +7,26 @@ const PORT = process.env.PORT || 3000;
 
 var users = {};
 var rooms = {};
-var games = {};
+// 방 관련 에러 코드
+// 1001 : createRoom할 때 타이틀 중복 시
+// 1002 : 해당 타이틀을 가진 방이 없을 때
+// 1003 : 해당 방에서 방장 권한이 없을 때(게임 시작시 발생)
+// 1004 : 해당 방이 풀방이 아닐 때 게임 시작 시
+// 1005 : 이미 게임 시작
+//
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    // console.log('a user connected');
     socket.on('setName', (name) => {
         users[socket.id] = name;
+        io.to(socket.id).emit('roomList', getRoomList());
     });
 
-    socket.on('getRoomList', () => {
+    socket.on('getRoomList', (name) => {
         io.to(socket.id).emit('roomList', getRoomList());
     });
 
@@ -80,9 +87,53 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('startGame', (title, name) => {
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        if (room.host !== name) {
+            io.to(socket.id).emit('roomError', 1003);
+            return;
+        }
+
+        if (!room.isFull()) {
+            io.to(socket.id).emit('roomError', 1004);
+            return;
+        }
+
+        if (room.isStarted()) {
+            io.to(socket.id).emit('roomError', 1005);
+            return;
+        }
+
+        // 게임 시작
+        console.log(title + ' : game start!');
+        room.startGame();
+        io.to(room.title).emit('startGame');
+
+        // 라운드 시작
+        room.game.startRound();
+        io.to(room.title).emit('startRound', { 'num' : room.game.rounds.length });
+
+        // 첫 카드 분배
+        var round = room.game.getCurrentRound();
+        round.distributeCardsFirst();
+
+        for (var userId in round.users) {
+            var user = round.users[userId];
+            var socketId = getSocketId(userId);
+            var data = { 'canCallLargeTichu' : true, 'cardList': user.handCards };
+            io.to(socketId).emit('distribute', data);
+        }
+    });
+
     socket.on('chat message', (title, name, msg) => {
         var room = rooms[title];
         if (room === undefined) {
+            io.to(socket.id).emit('room error', 1002);
             return;
         }
 
@@ -93,9 +144,7 @@ io.on('connection', (socket) => {
         console.log(socket.id);
         console.log('user disconnected');
         var name = users[socket.id];
-        console.log(name);
         var room = getRoom(name);
-        console.log(room);
 
         if (room === undefined) {
             return;
@@ -138,9 +187,18 @@ function getRoom(id) {
     return room;
 }
 
+function getSocketId(name) {
+    for (var socketId in users) {
+        if (name !== users[socketId]) {
+            continue;
+        }
+
+        return socketId;
+    }    
+}
+
 function getRoomList() {
     var roomInfoList = [];
-    console.log(rooms);
     for (var title in rooms) {
         roomInfoList.push(getRoomInfo(rooms[title]));
     }

@@ -57,9 +57,12 @@
     </head>
     <body>
         <h5 id="title">로비</h5>
+        <h5 id="alertMessage">메시지</h5>
+        <button onclick="getRoomList()">방 목록 가져오기</button>
         <button onclick="createRoom()">방 생성</button>
         <button onclick="joinRoom()">방 참여</button>
         <button onclick="leaveRoom()">방 나가기</button>
+        <button onclick="startGame()">게임 시작</button>
         <div id="container">
             <ul id="messages"></ul>
         </div>
@@ -75,16 +78,13 @@
             var socket;
             var cachedRooms;
             $(() => {
-                var inputName
+                var inputName;
                 while (inputName === undefined || inputName === null || inputName.trim().length === 0) {
                     inputName = prompt('네 이름이 뭐니?');
                 }
                 name = inputName;
 
                 socket = io();
-                socket.emit('setName', name);
-
-                socket.emit('getRoomList', '');
 
                 // $('select').change(() => {
                 //     socket.emit('leaveRoom', title, name);
@@ -112,35 +112,67 @@
                     $('#messages').append($('<li>').text(name + '    joined '+ title + ':)'));
                 });
 
+                socket.on('startGame', () => {
+                    $('#messages').append($('<li>').text(title + '    game start! :)'))
+                });
+
+                socket.on('startRound', (data) => {
+                    updateAlertMsg(data.num);
+                });
+
+                socket.on('distribute', (data) => {
+                    console.log(data);
+                });
+
                 socket.on('roomList', (rooms) => {
-                    if (title !== '로비') {
+                    if ((title !== undefined) && cachedRooms === undefined) {
                         return;
                     }
 
                     cachedRooms = rooms;
+                    console.log(cachedRooms);
+                    clearMsgs();
                     for (var idx in cachedRooms) {
                         var room = cachedRooms[idx];
+                        console.log(room);
                         $('#messages').append($('<li>').text(room.title + '             (' + room.personCnt + " / " + room.maxPersonCnt + ")"));
                     }
                 });
 
-                socket.on('room error', (code) => {
+                socket.on('roomError', (code) => {
+                    console.log({ errorCode : code });
                     switch(code) {
                         case 1001:
-                            alert("이미 해당 방이 있습니다.");
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("이미 해당 방이 있습니다.");
                             updateTitle();
                             clearMsgs();
                             break;
                         case 1002:
-                            alert("이미 해당 방이 존재하지 않습니다.");
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("이미 해당 방이 존재하지 않습니다.");
                             title = '로비';
                             updateTitle();
                             clearMsgs();
                             break;
+                        case 1003:
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("방장 권한이 없어 게임을 시작할 수 없습니다.");
+                            break;
+                        case 1004:
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("4명이 안 되기 때문에 게임을 시작할 수 없습니다.");
+                            break;
+                        case 1005:
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("이미 게임이 시작되었습니다.");
+                            break;
+                        default:
+                            alert("그냥 에러");
                     }
-
-                    alert("그냥 에러");
                 });
+
+                socket.emit('setName', name);
             });
             
             function createRoom() {
@@ -153,6 +185,7 @@
                 socket.emit('createRoom', title, name);
                 updateTitle();
                 clearMsgs();
+                cachedRooms = undefined;
             }
 
             function joinRoom() {
@@ -165,6 +198,11 @@
                 socket.emit('joinRoom', title, name);
                 updateTitle();
                 clearMsgs();
+                cachedRooms = undefined;
+            }
+
+            function getRoomList() {
+                socket.emit('getRoomList', '');
             }
 
             function leaveRoom() {
@@ -179,12 +217,20 @@
                 $('#title').text(title);
             }
 
+            function updateAlertMsg(msg) {
+                $('#alertMessage').text(msg);
+            }
+
             function clearMsgs() {
                 $('#messages').html('');
             }
 
             function scrollToBottom() {
                 window.scrollTo(0, document.body.scrollHeight);
+            }
+
+            function startGame() {
+                socket.emit('startGame', title, name);
             }
         </script>
     </body>

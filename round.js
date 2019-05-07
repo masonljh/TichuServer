@@ -201,6 +201,7 @@ method.raiseCards = function(id, cardIds) {
 
     this.firtUserId = id;
     var user = this.users[id];
+    user.callSmallTichu = false;
     var removeIdxArray = [];
     for (var i = 0; i < user.handCards.length; i++) {
         for (var j = 0; j < cardIds.length; j++) {
