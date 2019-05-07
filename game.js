@@ -1,38 +1,142 @@
+const Round = require('./round');
+
 var method = Game.prototype;
 
 function Game(users) {
-    this.aScore = 0;
-    this.bScore = 0;
+    this.winnerTeam;
     this.rounds = [];
     this.users = {};
 
     for (var id in users) {
-        if (this.turn === undefined) {
-            this.turn = id;
-        }
-
         this.users[id] = {};
         this.users[id].team = users[id].team;
     }
 }
 
-method.getCurrentRound = function() {
-    var currentRound;
-    if (rounds.length > 0) {
-        currentRound = rounds[rounds.length - 1];
-    }
-    return currentRound;
-}
-
 method.startRound = function() {
-    if (this.turn === undefined) {
-        this.turn = this.users;
-    }
     this.rounds.push(new Round(this.users));
 };
 
+method.getCurrentTurn = function() {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+    return round.getCurrentTurnUserId();
+};
+
+method.getCurrentRound = function() {
+    var currentRound;
+    if (this.rounds.length > 0) {
+        var length = this.rounds.length - 1;
+        currentRound = this.rounds[length];
+    }
+    return currentRound;
+};
+
+method.callLargeTichu = function(id) {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.callLargeTichu(id);
+};
+
+method.callSmallTichu = function(id) {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.callSmallTichu(id);
+};
+
+method.giveCards = function(data) {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.giveCards(data);
+};
+
+method.distributeCardsFirst = function() {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.distributeCardsFirst();
+};
+
+method.distributeCardsSecond = function() {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.distributeCardsSecond();
+};
+
+method.pass = function(id) {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        // 진행 중인 라운드가 없음
+        return;
+    }
+
+    round.pass(id);
+
+    if (!round.isOver()) {
+        return;
+    }
+
+    if (!this.isEnd()) {
+        return;
+    }
+
+    this.winnerTeam = this.aScore > this.bScore ? 'a' : 'b';
+};
+
 method.raiseCards = function(id, cards) {
-    getCurrentRound().raiseCards(id, cards);
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        // 진행 중인 라운드가 없음
+        return;
+    }
+
+    round.raiseCards(id, cards);
+
+    if (!round.isOver()) {
+        return;
+    }
+
+    if (!this.isEnd()) {
+        return;
+    }
+
+    this.winnerTeam = this.aScore > this.bScore ? 'a' : 'b';
+};
+
+method.isEnd = function() {
+    this.aScore = 0;
+    this.bScore = 0;
+    for (var i in this.rounds) {
+        var round = this.rounds[i];
+        this.aScore += round.aScore;
+        this.bScore += round.bScore;
+    }
+
+    if (this.aScore === this.bScore) {
+        return false;
+    }
+
+    if (this.aScore >= 1000 || this.bScore >= 1000) {
+        return true;
+    }
+
+    return false;
 };
 
 module.exports = Game;

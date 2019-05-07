@@ -117,6 +117,17 @@ method.giveCards = function(data) {
     this.users[data.from].isGivingCards = true;
 };
 
+method.checkAllGivingCards = function() {
+    for (var userId in this.users) {
+        var user = this.users[userId];
+        if (!user.isGivingCards) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
 method.fixCards = function() {
     for (var userId in this.users) {
         var user = this.users[userId];

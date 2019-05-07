@@ -180,6 +180,41 @@ describe('# Round Test', () => {
         });
     });
 
+    describe('# checkAllGivingCard', () => {
+        it('should return false', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.distributeCardsFirst();
+            round.distributeCardsSecond();
+            round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
+
+            // when
+            var result = round.checkAllGivingCards();
+
+            // then
+            assert.equal(result, false);
+        });
+
+        it('should return true', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.distributeCardsFirst();
+            round.distributeCardsSecond();
+            round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'def', ['abc', 'ghi', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'ghi', ['abc', 'def', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'jkl', ['abc', 'def', 'ghi']));
+
+            // when
+            var result = round.checkAllGivingCards();
+
+            // then
+            assert.equal(result, true);
+        });
+    });
+
     describe('# fixCards', () => {
         it('all cards should be in handCardsArray', () => {
             // given
