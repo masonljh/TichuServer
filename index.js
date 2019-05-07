@@ -13,6 +13,7 @@ var rooms = {};
 // 1003 : 해당 방에서 방장 권한이 없을 때(게임 시작시 발생)
 // 1004 : 해당 방이 풀방이 아닐 때 게임 시작 시
 // 1005 : 이미 게임 시작
+// 1006 : 방이 꽉 참
 //
 
 app.get('/', (req, res) => {
@@ -50,6 +51,11 @@ io.on('connection', (socket) => {
         var room = rooms[title];
         if (room === undefined) {
             io.to(socket.id).emit('room error', 1002);
+            return;
+        }
+
+        if (room.isFull()) {
+            io.to(socket.id).emit('room error', 1006);
             return;
         }
 
