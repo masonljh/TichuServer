@@ -204,6 +204,117 @@ describe('# Round Test', () => {
         });
     });
 
+    describe('# getNextTurnUserId', () => {
+        it('should return def when abc turn', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.firstUserId = 'abc';
+            round.currentTurn = 'abc';
+
+            // when
+            var result = round.getNextTurnUserId();
+
+            // then
+            assert.equal(result, 'def');
+        });
+
+        it('should return ghi when def turn', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.firstUserId = 'def';
+            round.currentTurn = 'def';
+
+            // when
+            var result = round.getNextTurnUserId();
+
+            // then
+            assert.equal(result, 'ghi');
+        });
+
+        it('should return jkl when ghi turn', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.firstUserId = 'ghi';
+            round.currentTurn = 'ghi';
+
+            // when
+            var result = round.getNextTurnUserId();
+
+            // then
+            assert.equal(result, 'jkl');
+        });
+
+        it('should return jkl when ghi turn', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.firstUserId = 'jkl';
+            round.currentTurn = 'jkl';
+
+            // when
+            var result = round.getNextTurnUserId();
+
+            // then
+            assert.equal(result, 'abc');
+        });
+    });
+
+    describe('# pass', () => {
+        it('should reward first user', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.handCards.push('3_98_0_25');
+            round.firstUserId = 'abc';
+            round.currentTurn = 'jkl';
+            round.paneCards = [['4_10_1_10', '4_10_1_10'], ['4_13_1_10', '4_13_1_10']];
+
+            // when
+            round.pass('jkl');
+
+            // then
+            assert.equal(round.getCurrentTurnUserId(), 'abc');
+            assert.equal(round.users.abc.rewardCards.length, 4);
+            assert.equal(round.paneCards.length, 0);
+        });
+
+        it('should not reward', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.firstUserId = 'jkl';
+            round.currentTurn = 'abc';
+            round.paneCards = [['4_10_1_10', '4_10_1_10'], ['4_13_1_10', '4_13_1_10']];
+
+            // when
+            round.pass('abc');
+
+            // then
+            assert.equal(round.getCurrentTurnUserId(), 'def');
+            assert.equal(round.users.abc.rewardCards.length, 0);
+            assert.equal(round.paneCards.length, 2);
+        });
+    });
+
+    describe('# rewardPaneCards', () => {
+        it('should be empty', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.paneCards = [['4_10_1_10', '4_10_1_10'], ['4_13_1_10', '4_13_1_10']];
+
+            // when
+            round.rewardPaneCards('abc');
+
+            // then
+            assert.equal(round.users.abc.rewardCards.length, 4);
+            assert.equal(round.paneCards.length, 0);
+        });
+    });
+
     describe('# raiseCards', () => {
         it('should raise cards', () => {
             // given
@@ -216,13 +327,14 @@ describe('# Round Test', () => {
             round.giveCards(getDummyGiveData(round, 'ghi', ['abc', 'def', 'jkl']));
             round.giveCards(getDummyGiveData(round, 'jkl', ['abc', 'def', 'ghi']));
             round.fixCards();
-            var cardId = round.users.abc.handCards[0];
+            var currentTurnId = round.getCurrentTurnUserId();
+            var cardId = round.users[currentTurnId].handCards[0];
 
             // when
-            round.raiseCards('abc', [ round.users.abc.handCards[0] ]);
+            round.raiseCards(currentTurnId, [ round.users[currentTurnId].handCards[0] ]);
 
             // then
-            assert.equal(round.users.abc.handCards.length, 13);
+            assert.equal(round.users[currentTurnId].handCards.length, 13);
             assert.equal(round.paneCards.length, 1);
             assert.equal(round.paneCards[0].length, 1);
             assert.equal(round.paneCards[0][0], cardId);
@@ -323,7 +435,7 @@ describe('# Round Test', () => {
             // given
             var users = getDummyUsers();
             var round = new Round(users);
-            round.currentRank = 5;
+            round.currentRank = 4;
             
             // when
             var result = round.isOver();
@@ -342,6 +454,125 @@ describe('# Round Test', () => {
 
             // then
             assert.equal(result, false);
+        });
+    });
+
+    describe('# setLastRankAndMoveRewards', () => {
+        it('should set last rank(4) and remove rewards', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.rank = 3;
+            round.users.def.rank = 2;
+            round.users.jkl.rank = 1;
+            round.users.ghi.rewardCards.push('0_1_0_0');
+            round.users.ghi.rewardCards.push('1_99_0_0');
+            round.users.ghi.rewardCards.push('4_2_4_0');
+            round.users.ghi.rewardCards.push('4_6_3_0');
+            round.currentRank = 4;
+            
+            // when
+            round.setLastRankAndMoveRewards();
+
+            // then
+            assert.equal(round.users.ghi.rank, 4);
+            assert.equal(round.users.jkl.rewardCards.length, 4);
+            assert.equal(round.users.ghi.rewardCards.length, 0);
+        });
+    });
+
+    describe('# getTichuScore', () => {
+        it('should return 200 when largeTichu is success', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.isLargeTichuCalled = true;
+            round.users.abc.isLargeTichuSuccess = true;
+
+            // when
+            var result = round.getTichuScore(round.users.abc);
+
+            // then
+            assert.equal(result, 200);
+        });
+
+        it('should return -200 when largeTichu is failure', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.isLargeTichuCalled = true;
+            round.users.abc.isLargeTichuSuccess = false;
+
+            // when
+            var result = round.getTichuScore(round.users.abc);
+
+            // then
+            assert.equal(result, -200);
+        });
+
+        it('should return 100 when smallTichu is success', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.isSmallTichuCalled = true;
+            round.users.abc.isSmallTichuSuccess = true;
+
+            // when
+            var result = round.getTichuScore(round.users.abc);
+
+            // then
+            assert.equal(result, 100);
+        });
+
+        it('should return -100 when smallTichu is failure', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.isSmallTichuCalled = true;
+            round.users.abc.isSmallTichuSuccess = false;
+
+            // when
+            var result = round.getTichuScore(round.users.abc);
+
+            // then
+            assert.equal(result, -100);
+        });
+    });
+
+    describe('# updateTotalScore', () => {
+        // @TODO : (jonghyo) 이건 나중에 좀 넣어보자
+    });
+
+    describe('# getUserCardScore', () => {
+        it('should return 0 when user has cards without score', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.rewardCards.push('0_1_0_0');
+            round.users.abc.rewardCards.push('1_99_0_0');
+            round.users.abc.rewardCards.push('4_2_4_0');
+            round.users.abc.rewardCards.push('4_6_3_0');
+            
+            // when
+            var result = round.getUserCardScore('abc');
+
+            // then
+            assert.equal(result, 0);
+        });
+
+        it('should return 10 when user has cards with score', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users);
+            round.users.abc.rewardCards.push('2_-1_0_-25');
+            round.users.abc.rewardCards.push('4_5_4_5');
+            round.users.abc.rewardCards.push('4_10_2_10');
+            
+            // when
+            var result = round.getUserCardScore('abc');
+
+            // then
+            assert.equal(result, -10);
         });
     });
 });

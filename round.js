@@ -12,11 +12,10 @@ function Round(users) {
     this.users = {};
     this.currentTurn;
     this.currentRank = 1;
+    this.firtUserId;
+    this.aScore = 0;
+    this.bScore = 0;
     for (var id in users) {
-        if (this.currentTurn === undefined) {
-            this.currentTurn = id;
-        }
-
         this.users[id] = {};
         var user = this.users[id];
         user.team = users[id].team;
@@ -135,6 +134,52 @@ method.fixCards = function() {
         }
         user.receiveCards = [];
     }
+};
+
+method.getNextTurnUserId = function() {
+    var isCurrent = false;
+    var first;
+    for (var userId in this.users) {
+        if (first === undefined) {
+            first = userId;
+        }
+
+        if (isCurrent) {
+            return userId;
+        }
+
+        if (this.currentTurn === userId) {
+            isCurrent = true;
+        }
+    }
+
+    return first;
+}
+
+method.pass = function(id) {
+    if (id !== this.currentTurn) {
+        // 현재 차례가 아님(그리고 이 경우에는 꼭 확인해봐야 함)
+        return;
+    }
+
+    var nextTurn = this.getNextTurnUserId();
+    if (nextTurn === this.firstUserId) {
+        this.rewardPaneCards(nextTurn);
+    }
+
+    this.currentTurn = nextTurn;
+};
+
+method.rewardPaneCards = function(id) {
+    var user = this.users[id];
+    for (var i in this.paneCards) {
+        var cardCombination = this.paneCards[i];
+        for (var j in cardCombination) {
+            user.rewardCards.push(cardCombination[j]);
+        }
+    }
+
+    this.paneCards = [];
 }
 
 method.raiseCards = function(id, cardIds) {
@@ -143,6 +188,7 @@ method.raiseCards = function(id, cardIds) {
         return;
     }
 
+    this.firtUserId = id;
     var user = this.users[id];
     var removeIdxArray = [];
     for (var i = 0; i < user.handCards.length; i++) {
@@ -169,6 +215,9 @@ method.raiseCards = function(id, cardIds) {
     if (!this.isOver()) {
         return;
     }
+
+    this.setLastRankAndMoveRewards();
+    this.updateTotalScore();
 };
 
 method.checkEmptyHand = function(id) {
@@ -193,11 +242,126 @@ method.updateRank = function(id, rank) {
 };
 
 method.isOver = function() {
-    return this.currentRank >= 5;
+    if (this.currentRank < 4) {
+        return false;
+    }
+
+    return true;
+};
+
+method.setLastRankAndMoveRewards = function() {
+    var firstUser;
+    var lastUser;
+    for (var userId in this.users) {
+        var user = this.users[userId];
+        if (user.rank === 1) {
+            firstUser = user;
+            continue;
+        }
+
+        if (user.rank > 0) {
+            continue;
+        }
+
+        user.rank = 4;
+        lastUser = user;
+    }
+
+    for (var idx in lastUser.rewardCards) {
+        firstUser.rewardCards.push(lastUser.rewardCards[idx]);
+    }
+    lastUser.rewardCards = [];
+};
+
+method.getTichuScore = function(user) {
+    var score = 0;
+    if (user.isLargeTichuCalled) {
+        score += user.isLargeTichuSuccess ? 200 : -200;
+        return score;
+    }
+
+    if (user.isSmallTichuCalled) {
+        score += user.isSmallTichuSuccess ? 100 : -100;
+    }
+    return score;
+}
+
+method.updateTotalScore = function() {
+    var firstUser;
+    var secondUser;
+    var thirdUser;
+
+    for (var userId in this.users) {
+        var user = this.users[userId];
+
+        // 티츄 성공 여부에 따른 점수 계산
+        if (user.team === 'a') {
+            this.aScore += this.getTichuScore(user);
+        } else {
+            this.bScore += this.getTichuScore(user);
+        }
+
+        switch(user.rank) {
+            case 1:
+                firstUser = user;
+                break;
+            case 2:
+                secondUser = user;
+                break;
+            case 3:
+                thirdUser = user;
+                break;
+        }
+    }
+
+    if (firstUser.team === secondUser.team) {
+        // 1등, 2등이 같은 팀(원투)
+        if (firstUser.team === 'a') {
+            this.aScore += 200;
+        } else {
+            this.bScore += 200;
+        }
+        return;
+    }
+
+    if (firstUser.team === thirdUser.team) {
+        // 1등, 3등이 같은 팀
+        var score = secondUser.getUserCardScore();
+        if (firstUser.team === 'a') {
+            this.aScore += (100 - score);
+            this.bScore += score;
+        } else {
+            this.aScore += score;
+            this.bScore += (100 - score);
+        }
+        return;
+    }
+
+    // 1등, 4등이 같은 팀
+    var score = firstUser.getUserCardScore();
+    if (firstUser.team === 'a') {
+        this.aScore += score;
+        this.bScore += (100 - score);
+    } else {
+        this.aScore += (100 - score);
+        this.bScore += score;
+    }
+};
+
+method.getUserCardScore = function(id) {
+    var rewardCards = this.users[id].rewardCards;
+    var score = 0;
+    for (var idx in rewardCards) {
+        var cardId = rewardCards[idx];
+        var cardInfo = cardId.split('_');
+        score += Number.parseInt(cardInfo[3]);
+    }
+
+    return score;
 };
 
 method.getCurrentTurnUserId = function() {
     return this.currentTurn;
-}
+};
 
 module.exports = Round;
