@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
 
     socket.on('createRoom', (title, name) => {
         if (rooms[title] !== undefined) {
-            io.to(socket.id).emit('room error', 1001);
+            io.to(socket.id).emit('roomError', 1001);
             return;
         }
 
@@ -50,12 +50,13 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', (title, name) => {
         var room = rooms[title];
         if (room === undefined) {
-            io.to(socket.id).emit('room error', 1002);
+            io.to(socket.id).emit('roomError', 1002);
             return;
         }
 
         if (room.isFull()) {
-            io.to(socket.id).emit('room error', 1006);
+            console.log(title + ' is full');
+            io.to(socket.id).emit('roomError', 1006);
             return;
         }
 
@@ -71,7 +72,7 @@ io.on('connection', (socket) => {
     socket.on('leaveRoom', (title, name) => {
         var room = rooms[title];
         if (room === undefined) {
-            io.to(socket.id).emit('room error', 1002);
+            io.to(socket.id).emit('roomError', 1002);
             return;
         }
 

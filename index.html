@@ -104,12 +104,24 @@
                     scrollToBottom();
                 });
                 
-                socket.on('leave', (title, name) => {
-                    $('#messages').append($('<li>').text(name + '    leaved '+ title + ' :('));
+                socket.on('leave', (roomTitle, userName) => {
+                    if (userName === name) {
+                        title = '로비';
+                        updateTitle();
+                        clearMsgs();
+                        socket.emit('getRoomList', '');
+                        return;
+                    }
+                    $('#messages').append($('<li>').text(userName + '    leaved '+ roomTitle + ' :('));
                 });
                 
-                socket.on('join', (title, name) => {
-                    $('#messages').append($('<li>').text(name + '    joined '+ title + ':)'));
+                socket.on('join', (roomTitle, userName) => {
+                    if (userName === name) {
+                        updateTitle();
+                        clearMsgs();
+                        cachedRooms = undefined;
+                    }
+                    $('#messages').append($('<li>').text(userName + '    joined '+ roomTitle + ':)'));
                 });
 
                 socket.on('startGame', () => {
@@ -167,6 +179,10 @@
                             // @TODO : (jonghyo) 나중에 UI로 처리할 것
                             updateAlertMsg("이미 게임이 시작되었습니다.");
                             break;
+                        case 1006:
+                            // @TODO : (jonghyo) 나중에 UI로 처리할 것
+                            updateAlertMsg("방에 들어갈 수 없습니다.");
+                            break;
                         default:
                             alert("그냥 에러");
                     }
@@ -196,9 +212,6 @@
                 }
 
                 socket.emit('joinRoom', title, name);
-                updateTitle();
-                clearMsgs();
-                cachedRooms = undefined;
             }
 
             function getRoomList() {
@@ -207,10 +220,6 @@
 
             function leaveRoom() {
                 socket.emit('leaveRoom', title, name);
-                title = '로비';
-                updateTitle();
-                clearMsgs();
-                socket.emit('getRoomList', '');
             }
 
             function updateTitle() {
