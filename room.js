@@ -26,7 +26,7 @@ method.isWaiting = function() {
 }
 
 method.isFull = function(id) {
-    return this.users.length === 4;
+    return this.aCnt + this.bCnt === 4;
 };
 
 method.isStarted = function(id) {
@@ -39,7 +39,7 @@ method.isNotEmpty = function() {
 
 method.joinUser = function(id) {
     if (this.checkUser(id)) {
-        this.users[id].isConnecting = true;
+        this.updateUserState(id, true);
         return;
     }
 
@@ -82,7 +82,7 @@ method.leaveUser = function(id) {
         this.bCnt--;
     }
 
-    console.log(this.users[id]);
+    // console.log(this.users[id]);
     delete this.users[id];
 };
 
