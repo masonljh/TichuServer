@@ -63,8 +63,11 @@
         <button onclick="joinRoom()">방 참여</button>
         <button onclick="leaveRoom()">방 나가기</button>
         <button onclick="startGame()">게임 시작</button>
+        <button onclick="callLargeTichu()">라지 티츄</button>
+        <button onclick="callSmallTichu()">스몰 티츄</button>
         <div id="container">
             <ul id="messages"></ul>
+            <div id="cards"></div>
         </div>
         <form action="">
             <input id="m" autocomplete="off"/>
@@ -77,6 +80,10 @@
             var title;
             var socket;
             var cachedRooms;
+            var users;
+            var myCards;
+            var canCallLargeTichu = false;
+            var canCallSmallTichu = false;
             $(() => {
                 var inputName;
                 while (inputName === undefined || inputName === null || inputName.trim().length === 0) {
@@ -84,7 +91,7 @@
                 }
                 name = inputName;
 
-                socket = io();
+                socket = io({ transports: ['websocket'] });
 
                 // $('select').change(() => {
                 //     socket.emit('leaveRoom', title, name);
@@ -124,8 +131,9 @@
                     $('#messages').append($('<li>').text(userName + '    joined '+ roomTitle + ':)'));
                 });
 
-                socket.on('startGame', () => {
-                    $('#messages').append($('<li>').text(title + '    game start! :)'))
+                socket.on('startGame', (data) => {
+                    users = data.users;
+                    $('#messages').append($('<li>').text(title + '    game start! :)'));
                 });
 
                 socket.on('startRound', (data) => {
@@ -133,7 +141,9 @@
                 });
 
                 socket.on('distribute', (data) => {
-                    console.log(data);
+                    canCallLargeTichu = data.canCallLargeTichu;
+                    canCallSmallTichu = data.canCallSmallTichu;
+                    myCards = data.cardList;
                 });
 
                 socket.on('roomList', (rooms) => {
@@ -183,6 +193,9 @@
                             // @TODO : (jonghyo) 나중에 UI로 처리할 것
                             updateAlertMsg("방에 들어갈 수 없습니다.");
                             break;
+                        case 1007:
+                            // @TODO : (jonghyo) 나중에 제대로 처리할 것
+                            alert("")
                         default:
                             alert("그냥 에러");
                     }
@@ -220,6 +233,26 @@
 
             function leaveRoom() {
                 socket.emit('leaveRoom', title, name);
+            }
+
+            function callLargeTichu() {
+                if (!canCallLargeTichu) {
+                    return;
+                }
+
+                socket.emit('largeTichu', title, name);
+            }
+
+            function callSmallTichu() {
+                if (!canCallSmallTichu) {
+                    return;
+                }
+
+                socket.emit('smallTichu', title, name);
+            }
+
+            function giveCards() {
+
             }
 
             function updateTitle() {
