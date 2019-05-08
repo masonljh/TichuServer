@@ -8,7 +8,7 @@ function Room(title, id) {
     this.users = {};
     this.users[id] = { 
         'team' : 'a',
-        'isConnecting' : true,
+        'isConnecting' : true
     };
     this.aCnt = 1;
     this.bCnt = 0;
@@ -50,7 +50,7 @@ method.joinUser = function(id) {
         return;
     }
 
-    if (this.aCnt <= 1) {
+    if (this.aCnt <= this.bCnt) {
         this.aCnt++;
         this.users[id] = { 
             'team' : 'a',

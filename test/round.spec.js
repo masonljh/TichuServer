@@ -10,7 +10,7 @@ describe('# Round Test', () => {
             var users = getDummyUsers();
 
             // when
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
 
             // then
             assert.equal(round.users.abc != undefined, true);
@@ -54,7 +54,7 @@ describe('# Round Test', () => {
         it('all users should have 8 cards', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
 
             // when
             round.distributeCardsFirst();
@@ -80,7 +80,7 @@ describe('# Round Test', () => {
         it('all users should have 14 cards', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
 
             // when
@@ -107,7 +107,7 @@ describe('# Round Test', () => {
         it('isLargeTichuCalled should be true', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.canCallLargeTichu = true;
 
             // when
@@ -120,7 +120,7 @@ describe('# Round Test', () => {
         it('isLargeTichuCalled should not update', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.canCallLargeTichu = false;
 
             // when
@@ -135,7 +135,7 @@ describe('# Round Test', () => {
         it('isSmallTichuCalled should be true', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.canCallSmallTichu = true;
 
             // when
@@ -148,7 +148,7 @@ describe('# Round Test', () => {
         it('isSmallTichuCalled should not update', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.canCallSmallTichu = false;
 
             // when
@@ -163,7 +163,7 @@ describe('# Round Test', () => {
         it('should remove cards from abc', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             round.distributeCardsSecond();
             var data = getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']);
@@ -184,7 +184,7 @@ describe('# Round Test', () => {
         it('should return false', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             round.distributeCardsSecond();
             round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
@@ -199,7 +199,7 @@ describe('# Round Test', () => {
         it('should return true', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             round.distributeCardsSecond();
             round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
@@ -219,7 +219,7 @@ describe('# Round Test', () => {
         it('all cards should be in handCardsArray', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             round.distributeCardsSecond();
             round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
@@ -240,26 +240,12 @@ describe('# Round Test', () => {
     });
 
     describe('# getNextTurnUserId', () => {
-        it('should return def when abc turn', () => {
+        it('should return ghi when abc turn', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.firstUserId = 'abc';
             round.currentTurn = 'abc';
-
-            // when
-            var result = round.getNextTurnUserId();
-
-            // then
-            assert.equal(result, 'def');
-        });
-
-        it('should return ghi when def turn', () => {
-            // given
-            var users = getDummyUsers();
-            var round = new Round(users);
-            round.firstUserId = 'def';
-            round.currentTurn = 'def';
 
             // when
             var result = round.getNextTurnUserId();
@@ -268,12 +254,12 @@ describe('# Round Test', () => {
             assert.equal(result, 'ghi');
         });
 
-        it('should return jkl when ghi turn', () => {
+        it('should return jkl when def turn', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
-            round.firstUserId = 'ghi';
-            round.currentTurn = 'ghi';
+            var round = new Round(users, getDummyTurns());
+            round.firstUserId = 'def';
+            round.currentTurn = 'def';
 
             // when
             var result = round.getNextTurnUserId();
@@ -282,10 +268,24 @@ describe('# Round Test', () => {
             assert.equal(result, 'jkl');
         });
 
-        it('should return jkl when ghi turn', () => {
+        it('should return def when ghi turn', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
+            round.firstUserId = 'ghi';
+            round.currentTurn = 'ghi';
+
+            // when
+            var result = round.getNextTurnUserId();
+
+            // then
+            assert.equal(result, 'def');
+        });
+
+        it('should return abc when jkl turn', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users, getDummyTurns());
             round.firstUserId = 'jkl';
             round.currentTurn = 'jkl';
 
@@ -301,7 +301,7 @@ describe('# Round Test', () => {
         it('should reward first user', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.handCards.push('3_98_0_25');
             round.firstUserId = 'abc';
             round.currentTurn = 'jkl';
@@ -319,7 +319,7 @@ describe('# Round Test', () => {
         it('should not reward', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.firstUserId = 'jkl';
             round.currentTurn = 'abc';
             round.paneCards = [['4_10_1_10', '4_10_1_10'], ['4_13_1_10', '4_13_1_10']];
@@ -328,7 +328,7 @@ describe('# Round Test', () => {
             round.pass('abc');
 
             // then
-            assert.equal(round.getCurrentTurnUserId(), 'def');
+            assert.equal(round.getCurrentTurnUserId(), 'ghi');
             assert.equal(round.users.abc.rewardCards.length, 0);
             assert.equal(round.paneCards.length, 2);
         });
@@ -338,7 +338,7 @@ describe('# Round Test', () => {
         it('should be empty', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.paneCards = [['4_10_1_10', '4_10_1_10'], ['4_13_1_10', '4_13_1_10']];
 
             // when
@@ -354,7 +354,7 @@ describe('# Round Test', () => {
         it('should raise cards', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             round.distributeCardsSecond();
             round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
@@ -380,7 +380,7 @@ describe('# Round Test', () => {
         it('should return false when user has cards', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.distributeCardsFirst();
             
             // when
@@ -393,7 +393,7 @@ describe('# Round Test', () => {
         it('should return true when user has no card', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             
             // when
             var result = round.checkEmptyHand('abc');
@@ -407,7 +407,7 @@ describe('# Round Test', () => {
         it('should has user which rank is 1 and largeTichu is success', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isLargeTichuCalled = true;
             
             // when
@@ -422,7 +422,7 @@ describe('# Round Test', () => {
         it('should has user which rank is 1 and smallTichu is success', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isSmallTichuCalled = true;
             
             // when
@@ -437,7 +437,7 @@ describe('# Round Test', () => {
         it('should has user which rank is 2 and largeTichu is failure', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isLargeTichuCalled = true;
             
             // when
@@ -452,7 +452,7 @@ describe('# Round Test', () => {
         it('should has user which rank is 2 and smallTichu is failure', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isSmallTichuCalled = true;
             
             // when
@@ -469,7 +469,7 @@ describe('# Round Test', () => {
         it('should return true when round is over', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.currentRank = 4;
             
             // when
@@ -482,7 +482,7 @@ describe('# Round Test', () => {
         it('should return false when round is not over', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             
             // when
             var result = round.isOver();
@@ -496,7 +496,7 @@ describe('# Round Test', () => {
         it('should set last rank(4) and remove rewards', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.rank = 3;
             round.users.def.rank = 2;
             round.users.jkl.rank = 1;
@@ -520,7 +520,7 @@ describe('# Round Test', () => {
         it('should return 200 when largeTichu is success', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isLargeTichuCalled = true;
             round.users.abc.isLargeTichuSuccess = true;
 
@@ -534,7 +534,7 @@ describe('# Round Test', () => {
         it('should return -200 when largeTichu is failure', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isLargeTichuCalled = true;
             round.users.abc.isLargeTichuSuccess = false;
 
@@ -548,7 +548,7 @@ describe('# Round Test', () => {
         it('should return 100 when smallTichu is success', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isSmallTichuCalled = true;
             round.users.abc.isSmallTichuSuccess = true;
 
@@ -562,7 +562,7 @@ describe('# Round Test', () => {
         it('should return -100 when smallTichu is failure', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.isSmallTichuCalled = true;
             round.users.abc.isSmallTichuSuccess = false;
 
@@ -582,7 +582,7 @@ describe('# Round Test', () => {
         it('should return 0 when user has cards without score', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.rewardCards.push('0_1_0_0');
             round.users.abc.rewardCards.push('1_99_0_0');
             round.users.abc.rewardCards.push('4_2_4_0');
@@ -598,7 +598,7 @@ describe('# Round Test', () => {
         it('should return 10 when user has cards with score', () => {
             // given
             var users = getDummyUsers();
-            var round = new Round(users);
+            var round = new Round(users, getDummyTurns());
             round.users.abc.rewardCards.push('2_-1_0_-25');
             round.users.abc.rewardCards.push('4_5_4_5');
             round.users.abc.rewardCards.push('4_10_2_10');
@@ -611,6 +611,11 @@ describe('# Round Test', () => {
         });
     });
 });
+
+function getDummyTurns() {
+    var turns = ['abc', 'ghi', 'def', 'jkl'];
+    return turns;
+}
 
 function getDummyUsers() {
     var users = {};

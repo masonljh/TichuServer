@@ -40,6 +40,16 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('roomList', getRoomList());
     });
 
+    socket.on('getRoom', (title) => {
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        io.to(socket.id).emit('roomInfo', getRoomInfo(room));
+    });
+
     socket.on('createRoom', (title, name) => {
         if (rooms[title] !== undefined) {
             io.to(socket.id).emit('roomError', 1001);

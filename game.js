@@ -6,15 +6,31 @@ function Game(users) {
     this.winnerTeam;
     this.rounds = [];
     this.users = {};
+    this.turns = [];
 
+    var temp;
     for (var id in users) {
         this.users[id] = {};
         this.users[id].team = users[id].team;
+        if (this.turns.length === 0) {
+            this.turns.push(id);
+        }
+
+        if (this.turns[this.turns.length - 1].team === users[id].team) {
+            temp = id;   
+        } else {
+            this.turns.push(id);
+
+            if (temp) {
+                this.turns.push(temp);
+                temp = undefined;
+            }
+        }
     }
 }
 
 method.startRound = function() {
-    this.rounds.push(new Round(this.users));
+    this.rounds.push(new Round(this.users, this.turns));
 };
 
 method.getCurrentTurn = function() {

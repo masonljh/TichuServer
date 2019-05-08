@@ -7,12 +7,13 @@ var method = Round.prototype;
 	DRAGON(3),
 	NORMAL(4); */
 
-function Round(users) {
+function Round(users, turns) {
     this.paneCards = [];
     this.users = {};
     this.currentTurn;
     this.currentRank = 1;
     this.firtUserId;
+    this.turns = turns;
     this.aScore = 0;
     this.bScore = 0;
     for (var id in users) {
@@ -148,23 +149,15 @@ method.fixCards = function() {
 };
 
 method.getNextTurnUserId = function() {
-    var isCurrent = false;
-    var first;
-    for (var userId in this.users) {
-        if (first === undefined) {
-            first = userId;
-        }
-
-        if (isCurrent) {
-            return userId;
-        }
-
-        if (this.currentTurn === userId) {
-            isCurrent = true;
+    for (var i in this.turns) {
+        var userId = this.turns[i];
+        if (userId === this.currentTurn) {
+            var nextTurnIdx = Number.parseInt(i) === this.turns.length - 1 ? 0 : Number.parseInt(i) + 1;
+            return this.turns[nextTurnIdx];
         }
     }
 
-    return first;
+    return 0;
 }
 
 method.pass = function(id) {
