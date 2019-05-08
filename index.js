@@ -14,6 +14,7 @@ var rooms = {};
 // 1004 : 해당 방이 풀방이 아닐 때 게임 시작 시
 // 1005 : 이미 게임 시작
 // 1006 : 방이 꽉 참
+// 1007 : 닉네임 중복
 //
 
 app.get('/', (req, res) => {
@@ -23,6 +24,13 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     // console.log('a user connected');
     socket.on('setName', (name) => {
+        for (var socketId in users) {
+            if (name === users[socketId]) {
+                io.to(socket.id).emit('nameError', 1007);
+                return;
+            }
+        }
+
         users[socket.id] = name;
         io.to(socket.id).emit('roomList', getRoomList());
     });
@@ -119,7 +127,7 @@ io.on('connection', (socket) => {
         // 게임 시작
         console.log(title + ' : game start!');
         room.startGame();
-        io.to(room.title).emit('startGame');
+        io.to(room.title).emit('startGame', { 'users' : room.users });
 
         // 라운드 시작
         room.game.startRound();
@@ -132,15 +140,37 @@ io.on('connection', (socket) => {
         for (var userId in round.users) {
             var user = round.users[userId];
             var socketId = getSocketId(userId);
-            var data = { 'canCallLargeTichu' : true, 'cardList': user.handCards };
+            var data = { 'canCallLargeTichu' : true, 'canCallSmallTichu' : false, 'cardList': user.handCards };
             io.to(socketId).emit('distribute', data);
         }
+    });
+
+    socket.on('largeTichu', (title, name) => {
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        room.game.callLargeTichu(name);
+        io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: true, isSmallTichuCalled: false });
+    });
+
+    socket.on('smallTichu', (title, name) => {
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        room.game.callSmallTichu(name);
+        io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: false, isSmallTichuCalled: true });
     });
 
     socket.on('chat message', (title, name, msg) => {
         var room = rooms[title];
         if (room === undefined) {
-            io.to(socket.id).emit('room error', 1002);
+            io.to(socket.id).emit('roomError', 1002);
             return;
         }
 
@@ -158,7 +188,7 @@ io.on('connection', (socket) => {
         }
 
         room.leaveUser(name);
-        io.to(room.title).emit('leave', room.title, name);
+        io.to(room.title).emit('leave', room.title, name, room.host);
         console.log(name + ' leave a ' + room.title);
         if (room.isNotEmpty()) {
             return;
@@ -175,6 +205,8 @@ io.on('connection', (socket) => {
 function getRoomInfo(room) {
     var roomInfo = {};
     roomInfo.title = room.title;
+    roomInfo.host = room.host;
+    roomInfo.users = room.users;
     roomInfo.personCnt = room.getUserCnt();
     roomInfo.maxPersonCnt = 4;
     return roomInfo;
