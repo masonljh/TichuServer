@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
         var room = rooms[title];
         socket.join(room.title, () => {
             console.log(name + ' join a ' + room.title);
-            io.to(room.title).emit('join', room.title, name);
+            io.to(room.title).emit('join', room.title, name, 'a');
             io.emit('roomList', getRoomList());
         });
     });
@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 
         socket.join(room.title, () => {
             console.log(name + ' join a ' + room.title);
-            io.to(room.title).emit('join', room.title, name);
+            io.to(room.title).emit('join', room.title, name, room.users[name].team);
             io.emit('roomList', getRoomList());
         });
     });
