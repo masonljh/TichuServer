@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    // console.log('a user connected');
+    console.log('a user connected');
     socket.on('setName', (name) => {
         for (var socketId in users) {
             if (name === users[socketId]) {
@@ -32,7 +32,8 @@ io.on('connection', (socket) => {
         }
 
         users[socket.id] = name;
-        io.to(socket.id).emit('roomList', getRoomList());
+        console.log(name + ' welcome');
+        io.to(socket.id).emit('welcome', name);
     });
 
     socket.on('getRoomList', (name) => {
