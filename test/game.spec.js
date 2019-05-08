@@ -53,7 +53,6 @@ describe('# Game Test', () => {
             game.startRound();
             game.rounds[0].currentTurn = 'abc';
 
-
             // when
             var result = game.getCurrentTurn();
 

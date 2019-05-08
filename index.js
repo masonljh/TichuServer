@@ -138,7 +138,7 @@ io.on('connection', (socket) => {
         // 게임 시작
         console.log(title + ' : game start!');
         room.startGame();
-        io.to(room.title).emit('startGame', { 'users' : room.users });
+        io.to(room.title).emit('startGame', { 'turns': room.game.turns });
 
         // 라운드 시작
         room.game.startRound();
