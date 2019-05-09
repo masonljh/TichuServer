@@ -66,6 +66,7 @@
         <button onclick="callLargeTichu()">라지 티츄</button>
         <button onclick="passLargeTichu()">라지 티츄 패스</button>
         <button onclick="callSmallTichu()">스몰 티츄</button>
+        <button onclick="giveRandomCardsForTest()">자동 카드 분배</button>
         <div id="container">
             <ul id="messages"></ul>
             <div id="cards"></div>
@@ -82,6 +83,7 @@
             var socket;
             var cachedRooms;
             var users;
+            var isMyTurn = false;
             var myCards;
             var canCallLargeTichu = false;
             var canCallSmallTichu = false;
@@ -133,7 +135,8 @@
                 });
 
                 socket.on('startGame', (data) => {
-                    users = data.users;
+                    users = data.turns;
+                    console.log(users);
                     $('#messages').append($('<li>').text(title + '    game start! :)'));
                 });
 
@@ -141,10 +144,29 @@
                     updateAlertMsg(data.num);
                 });
 
+                socket.on('updateTichuInfo', (data) => {
+                
+                });
+
                 socket.on('distribute', (data) => {
+                    console.log('on Distribute ');
+                    console.log(data);
+                    
                     canCallLargeTichu = data.canCallLargeTichu;
                     canCallSmallTichu = data.canCallSmallTichu;
                     myCards = data.cardList;
+                });
+
+                socket.on('fixCards', (data) => {
+                    canCallLargeTichu = data.canCallLargeTichu;
+                    canCallSmallTichu = data.canCallSmallTichu;
+                    myCards = data.cardList;
+                });
+
+                socket.on('turn', (userName) => {
+                    // 차례 알림
+                    updateAlertMsg(userName + 'is turn.');
+                    isMyTurn = userName === name;
                 });
 
                 socket.on('roomList', (rooms) => {
@@ -238,9 +260,12 @@
 
             function callLargeTichu() {
                 if (!canCallLargeTichu) {
+                    console.log('라티 할 수 없음');
                     return;
                 }
 
+                console.log('라티 ㄱㄱ');
+                canCallLargeTichu = false;
                 socket.emit('largeTichu', title, name, true);
             }
 
@@ -249,6 +274,7 @@
                     return;
                 }
 
+                canCallSmallTichu = false;
                 socket.emit('smallTichu', title, name);
             }
 
@@ -257,11 +283,21 @@
                     return;
                 }
 
-                socket.emit('largeTichu', title, name, false)
+                console.log('라티 패스');
+                canCallLargeTichu = false;
+                socket.emit('largeTichu', title, name, false);
             }
 
-            function giveCards() {
+            function giveRandomCardsForTest() {
+                var datas = [];
+                for (var i in users) {
+                    if (users[i] === name) {
+                        continue;
+                    }
 
+                    datas.push({ to: users[i], cardId: myCards[i] });
+                }
+                socket.emit('giveCards', title, name, datas);
             }
 
             function updateTitle() {

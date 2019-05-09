@@ -145,48 +145,52 @@ io.on('connection', (socket) => {
         io.to(room.title).emit('startRound', { 'num' : room.game.rounds.length });
 
         // 첫 카드 분배
+        console.log(title + ' : card first distribution');
         var round = room.game.getCurrentRound();
         round.distributeCardsFirst();
 
         for (var userId in round.users) {
             var user = round.users[userId];
-            var socketId = getSocketId(userId);
             var data = { 'canCallLargeTichu' : true, 'canCallSmallTichu' : false, 'cardList': user.handCards };
-            io.to(socketId).emit('distribute', data);
+            io.to(getSocketId(userId)).emit('distribute', data);
         }
     });
 
     socket.on('largeTichu', (title, name, isLargeTichuCalled) => {
+        console.log('on LargeTichu ' + title + ' / ' + name + ' / ' + isLargeTichuCalled);
         var room = rooms[title];
         if (room === undefined) {
             io.to(socket.id).emit('roomError', 1002);
             return;
         }
 
+        var round = room.game.getCurrentRound();
         if (isLargeTichuCalled) {
-            room.game.callLargeTichu(name);
+            round.callLargeTichu(name);
         } else {
-            room.game.passLargeTichu(name);
+            round.passLargeTichu(name);
         }
         io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: isLargeTichuCalled });
 
-        if (!room.game.getCurrentRound().checkAllLargeTichu()) {
+        if (!round.checkAllLargeTichu()) {
             // 아직 모두가 라지티츄에 대한 선택을 하지 않음
+            console.log('아직 다 라지티츄에 대해 결정하지 않음');
             return;
         }
 
         // 모두가 라지 티츄에 대한 선택을 했다면 두번째 카드 배분
-        room.game.distributeCardsSecond();
+        console.log(title + ' : card second distribution');
+        round.distributeCardsSecond();
 
-        for (var userId in room.game.getCurrentRound().users) {
-            var user = room.game.getCurrentRound().users[userId];
-            var socketId = getSocketId(userId);
-            var data = { 'canCallLargeTichu' : false, 'canCallSmallTichu' : true, 'cardList': user.handCards };
-            io.to(socketId).emit('distribute', data);
+        for (var userId in round.users) {
+            var user = round.users[userId];
+            var data = { 'canCallLargeTichu' : false, 'canCallSmallTichu' : false, 'cardList': user.handCards };
+            io.to(getSocketId(userId)).emit('distribute', data);
         }
     });
 
     socket.on('smallTichu', (title, name) => {
+        console.log('on SmallTichu ' + title + ' / ' + name);
         var room = rooms[title];
         if (room === undefined) {
             io.to(socket.id).emit('roomError', 1002);
@@ -195,6 +199,35 @@ io.on('connection', (socket) => {
 
         room.game.callSmallTichu(name);
         io.to(room.title).emit('updateTichuInfo', { name: name, isSmallTichuCalled: true });
+    });
+
+    socket.on('giveCards', (title, name, data) => {
+        // { from : '', infos : [ { to : '', cardId : '' }, ....]}
+        console.log('on GiveCards ' + title + ' / ' + name);
+        console.log(data);
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        var info = {};
+        info.from = name;
+        info.infos = data;
+
+        room.game.giveCards(info);
+
+        var round = room.game.getCurrentRound();
+        if (!round.checkAllGivingCards()) {
+            return;
+        }
+
+        for (var userId in round.users) {
+            var user = round.users[userId];
+            io.to(getSocketId(userId)).emit('fixCards', { name: name, 'cardList': user.handCards });
+        }
+
+        io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
     });
 
     socket.on('chat message', (title, name, msg) => {

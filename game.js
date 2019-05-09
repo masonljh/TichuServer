@@ -14,6 +14,7 @@ function Game(users) {
         this.users[id].team = users[id].team;
         if (this.turns.length === 0) {
             this.turns.push(id);
+            continue;
         }
 
         if (this.turns[this.turns.length - 1].team === users[id].team) {
