@@ -64,6 +64,7 @@
         <button onclick="leaveRoom()">방 나가기</button>
         <button onclick="startGame()">게임 시작</button>
         <button onclick="callLargeTichu()">라지 티츄</button>
+        <button onclick="passLargeTichu()">라지 티츄 패스</button>
         <button onclick="callSmallTichu()">스몰 티츄</button>
         <div id="container">
             <ul id="messages"></ul>
@@ -240,7 +241,7 @@
                     return;
                 }
 
-                socket.emit('largeTichu', title, name);
+                socket.emit('largeTichu', title, name, true);
             }
 
             function callSmallTichu() {
@@ -249,6 +250,14 @@
                 }
 
                 socket.emit('smallTichu', title, name);
+            }
+
+            function passLargeTichu() {
+                if (!canCallLargeTichu) {
+                    return;
+                }
+
+                socket.emit('largeTichu', title, name, false)
             }
 
             function giveCards() {
