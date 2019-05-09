@@ -99,7 +99,7 @@ io.on('connection', (socket) => {
 
         socket.leave(room.title, () => {
             console.log(name + ' leave a ' + room.title);
-            io.to(room.title).emit('leave', room.title, name);
+            io.to(room.title).emit('leave', room.title, name, room.host);
 
             if (room.isNotEmpty()) {
                 return;
