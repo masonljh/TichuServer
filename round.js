@@ -123,6 +123,10 @@ method.distributeCardsSecond = function() {
 
 method.giveCards = function(data) {
     // { from : '', infos : [ { to : '', cardId : '' }, ....]}
+    if (this.users[data.from].isGivingCards) {
+        return;
+    }
+
     var removeIdxArray = [];
     for (var i = 0; i < this.users[data.from].handCards.length; i++) {
         for (var j = 0; j < data.infos.length; j++) {
