@@ -158,6 +158,9 @@
                 });
 
                 socket.on('fixCards', (data) => {
+                    console.log('on FixCards ');
+                    console.log(data);
+
                     canCallLargeTichu = data.canCallLargeTichu;
                     canCallSmallTichu = data.canCallSmallTichu;
                     myCards = data.cardList;

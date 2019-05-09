@@ -219,13 +219,15 @@ io.on('connection', (socket) => {
 
         var round = room.game.getCurrentRound();
         if (!round.checkAllGivingCards()) {
+            console.log("아직 카드 전달이 완료가 안 됨");
             return;
         }
 
+        console.log("모든 유저의 카드 전달 완료!!");
         round.fixCards();
         for (var userId in round.users) {
             var user = round.users[userId];
-            io.to(getSocketId(userId)).emit('fixCards', { name: name, 'cardList': user.handCards });
+            io.to(getSocketId(userId)).emit('fixCards', { name: userId, 'cardList': user.handCards });
         }
 
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
