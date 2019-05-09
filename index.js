@@ -176,10 +176,10 @@ io.on('connection', (socket) => {
         }
 
         // 모두가 라지 티츄에 대한 선택을 했다면 두번째 카드 배분
-        room.distributeCardsSecond();
+        room.game.distributeCardsSecond();
 
-        for (var userId in round.users) {
-            var user = round.users[userId];
+        for (var userId in room.game.getCurrentRound().users) {
+            var user = room.game.getCurrentRound().users[userId];
             var socketId = getSocketId(userId);
             var data = { 'canCallLargeTichu' : false, 'canCallSmallTichu' : true, 'cardList': user.handCards };
             io.to(socketId).emit('distribute', data);
