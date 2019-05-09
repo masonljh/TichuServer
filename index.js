@@ -156,15 +156,34 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('largeTichu', (title, name) => {
+    socket.on('largeTichu', (title, name, isLargeTichuCalled) => {
         var room = rooms[title];
         if (room === undefined) {
             io.to(socket.id).emit('roomError', 1002);
             return;
         }
 
-        room.game.callLargeTichu(name);
-        io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: true, isSmallTichuCalled: false });
+        if (isLargeTichuCalled) {
+            room.game.callLargeTichu(name);
+        } else {
+            room.game.passLargeTichu(name);
+        }
+        io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: isLargeTichuCalled });
+
+        if (!room.game.getCurrentRound().checkAllLargeTichu()) {
+            // 아직 모두가 라지티츄에 대한 선택을 하지 않음
+            return;
+        }
+
+        // 모두가 라지 티츄에 대한 선택을 했다면 두번째 카드 배분
+        room.distributeCardsSecond();
+
+        for (var userId in round.users) {
+            var user = round.users[userId];
+            var socketId = getSocketId(userId);
+            var data = { 'canCallLargeTichu' : false, 'canCallSmallTichu' : true, 'cardList': user.handCards };
+            io.to(socketId).emit('distribute', data);
+        }
     });
 
     socket.on('smallTichu', (title, name) => {
@@ -175,7 +194,7 @@ io.on('connection', (socket) => {
         }
 
         room.game.callSmallTichu(name);
-        io.to(room.title).emit('updateTichuInfo', { name: name, isLargeTichuCalled: false, isSmallTichuCalled: true });
+        io.to(room.title).emit('updateTichuInfo', { name: name, isSmallTichuCalled: true });
     });
 
     socket.on('chat message', (title, name, msg) => {
@@ -193,6 +212,7 @@ io.on('connection', (socket) => {
         console.log('user disconnected');
         var name = users[socket.id];
         var room = getRoom(name);
+        delete users[socket.id];
 
         if (room === undefined) {
             return;
@@ -207,7 +227,6 @@ io.on('connection', (socket) => {
 
         delete rooms[room.title];
         delete room;
-        delete users[socket.id];
 
         io.emit('roomList', getRoomList());
     });

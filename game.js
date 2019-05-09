@@ -59,6 +59,15 @@ method.callLargeTichu = function(id) {
     round.callLargeTichu(id);
 };
 
+method.passLargeTichu = function(id) {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        return round;
+    }
+
+    round.passLargeTichu(id);
+};
+
 method.callSmallTichu = function(id) {
     var round = this.getCurrentRound();
     if (round === undefined) {

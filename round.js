@@ -54,7 +54,32 @@ method.callLargeTichu = function(id) {
         return;
     }
 
+    this.users[id].canCallLargeTichu = false;
     this.users[id].isLargeTichuCalled = true;
+};
+
+method.passLargeTichu = function(id) {
+    // @TODO : (jonghyo) 테스트 코드 필요
+    if (this.users[id] === undefined) {
+        return;
+    }
+
+    if (!this.users[id].canCallLargeTichu) {
+        return;
+    }
+
+    this.users[id].canCallLargeTichu = false;
+};
+
+method.checkAllLargeTichu = function() {
+    // @TODO : (jonghyo) 테스트 코드 필요
+    for (var id in this.users) {
+        if (this.users[id].canCallLargeTichu) {
+            return false;
+        }
+    }
+
+    return true;
 };
 
 method.callSmallTichu = function(id) {
