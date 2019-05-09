@@ -67,6 +67,8 @@
         <button onclick="passLargeTichu()">라지 티츄 패스</button>
         <button onclick="callSmallTichu()">스몰 티츄</button>
         <button onclick="giveRandomCardsForTest()">자동 카드 분배</button>
+        <button onclick="raiseRandomCardForTest()">한 장 카드 내기</button>
+        <button onclick="pass()">패스</button>
         <div id="container">
             <ul id="messages"></ul>
             <div id="cards"></div>
@@ -83,6 +85,7 @@
             var socket;
             var cachedRooms;
             var users;
+            var paneCards;
             var isMyTurn = false;
             var myCards;
             var canCallLargeTichu = false;
@@ -168,8 +171,18 @@
 
                 socket.on('turn', (userName) => {
                     // 차례 알림
+                    console.log('on Turn ' + userName);
                     updateAlertMsg(userName + 'is turn.');
                     isMyTurn = userName === name;
+                });
+
+                socket.on('raiseCards', (data) => {
+                    console.log('on raiseCards ');
+                    console.log(data);
+                    if (name === data.name) {
+                        myCards = data.cardList;
+                    }
+                    paneCards = data.paneCardList;
                 });
 
                 socket.on('roomList', (rooms) => {
@@ -301,6 +314,27 @@
                     datas.push({ to: users[i], cardId: myCards[i] });
                 }
                 socket.emit('giveCards', title, name, datas);
+            }
+
+            function raiseRandomCardForTest() {
+                if (!isMyTurn) {
+                    console.log("응 니 차례 아니야~");
+                    return;
+                }
+
+                var raiseCards = [];
+                raiseCards.push(myCards[0]);
+                console.log('raiseCards 요청');
+                console.log(raiseCards);
+                socket.emit('raiseCards', title, name, raiseCards);
+            }
+
+            function pass() {
+                if (!isMyTurn) {
+                    return;
+                }
+
+                socket.emit('pass', title, name);
             }
 
             function updateTitle() {

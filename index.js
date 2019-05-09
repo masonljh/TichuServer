@@ -233,6 +233,61 @@ io.on('connection', (socket) => {
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
     });
 
+    socket.on('raiseCards', (title, name, cardList) => {
+        console.log('on RaiseCards ' + title + ' / ' + name);
+        console.log(cardList);
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        room.game.raiseCards(name, cardList);
+        var round = room.game.getCurrentRound();
+        for (var userId in round.users) {
+            var user = round.users[userId];
+
+            var data = {
+                name: name,
+                paneCardList : round.paneCards,
+                cardCnt : user.handCards.length
+            };
+
+            if (userId === name) {
+                data.cardList = user.handCards;
+            }
+
+            io.to(getSocketId(userId)).emit('raiseCards', data);
+        }
+
+        if (room.game.isEnd()) {
+            // 게임이 끝났다고 알려줘야됨
+            console.log('게임 끝');
+            return;
+        }
+
+        if (room.game.isRoundOver()) {
+            // 라운드만 끝이 났다면
+            console.log('라운드 끝');
+            return;
+        }
+
+        // 라운드도 끝이 안 났다면
+        console.log('턴 넘어감');
+        io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
+    });
+
+    socket.on('pass', (title, name) => {
+        console.log('on Pass ' + title + ' / ' + name);
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        room.game.pass();
+    });
+
     socket.on('chat message', (title, name, msg) => {
         var room = rooms[title];
         if (room === undefined) {

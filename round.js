@@ -16,6 +16,8 @@ function Round(users, turns) {
     this.turns = turns;
     this.aScore = 0;
     this.bScore = 0;
+    this.skipTurn = [false, false, false, false];
+
     for (var id in users) {
         this.users[id] = {};
         var user = this.users[id];
@@ -177,15 +179,28 @@ method.fixCards = function() {
 };
 
 method.getNextTurnUserId = function() {
-    for (var i in this.turns) {
-        var userId = this.turns[i];
-        if (userId === this.currentTurn) {
-            var nextTurnIdx = Number.parseInt(i) === this.turns.length - 1 ? 0 : Number.parseInt(i) + 1;
-            return this.turns[nextTurnIdx];
+    var nextTurnId;
+    while (true) {
+        for (var i in this.turns) {
+            var userId = this.turns[i];
+            if (userId === this.currentTurn) {
+                var nextTurnIdx = Number.parseInt(i) === this.turns.length - 1 ? 0 : Number.parseInt(i) + 1;
+                if (!this.skipTurn[nextTurnIdx]) {
+                    nextTurnId = this.turns[nextTurnIdx];
+                    break;
+                } else {
+                    this.currentTurn = nextTurnId;
+                    break;
+                }
+            }
+        }
+
+        if (nextTurnId) {
+            break;
         }
     }
 
-    return 0;
+    return nextTurnId;
 }
 
 method.pass = function(id) {
@@ -196,7 +211,18 @@ method.pass = function(id) {
 
     var nextTurn = this.getNextTurnUserId();
     if (nextTurn === this.firstUserId) {
-        this.rewardPaneCards(nextTurn);
+        this.rewardPaneCards(this.firstUserId);
+        if (this.users[nextTurn].handCards.length === 0) {
+            // 비어있다면 
+            for (var i in this.turns) {
+                var userId = this.turns[i];
+                if (userId === nextTurn) {
+                    this.skipTurn[i] = true;
+                    nextTurn = this.getNextTurnUserId();
+                    break;
+                }
+            }
+        }
     }
 
     this.currentTurn = nextTurn;
@@ -238,6 +264,8 @@ method.raiseCards = function(id, cardIds) {
     }
 
     this.paneCards.push(cardIds);
+    this.updateOtherSkipTurns();
+    this.currentTurn = this.getNextTurnUserId();
 
     if (!this.checkEmptyHand(id)) {
         return;
@@ -251,6 +279,26 @@ method.raiseCards = function(id, cardIds) {
 
     this.setLastRankAndMoveRewards();
     this.updateTotalScore();
+};
+
+method.updateOtherSkipTurns = function(id) {
+    for (var userId in this.users) {
+        if (userId === id) {
+            continue;
+        }
+
+        if (this.users[userId].handCards.length > 0) {
+            continue;
+        }
+
+        for (var i in this.turns) {
+            var turnId = this.turns[i];
+            if (turnId === userId) {
+                this.skipTurn[i] = true;
+                break;
+            }
+        }
+    }
 };
 
 method.checkEmptyHand = function(id) {

@@ -145,6 +145,16 @@ method.raiseCards = function(id, cards) {
     this.winnerTeam = this.aScore > this.bScore ? 'a' : 'b';
 };
 
+method.isRoundOver = function() {
+    var round = this.getCurrentRound();
+    if (round === undefined) {
+        // 진행 중인 라운드가 없음
+        return true;
+    }
+
+    return round.isOver();
+}
+
 method.isEnd = function() {
     this.aScore = 0;
     this.bScore = 0;
