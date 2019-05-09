@@ -126,6 +126,7 @@ method.giveCards = function(data) {
     if (this.users[data.from].isGivingCards) {
         return;
     }
+    this.users[data.from].isGivingCards = true;
 
     var removeIdxArray = [];
     for (var i = 0; i < this.users[data.from].handCards.length; i++) {
@@ -143,8 +144,6 @@ method.giveCards = function(data) {
     for (var idx in data.infos) {
         this.users[data.infos[idx].to].receiveCards.push(data.infos[idx].cardId);
     }
-
-    this.users[data.from].isGivingCards = true;
 };
 
 method.checkAllGivingCards = function() {
