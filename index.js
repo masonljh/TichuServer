@@ -222,6 +222,7 @@ io.on('connection', (socket) => {
             return;
         }
 
+        round.fixCards();
         for (var userId in round.users) {
             var user = round.users[userId];
             io.to(getSocketId(userId)).emit('fixCards', { name: name, 'cardList': user.handCards });
