@@ -218,6 +218,11 @@ io.on('connection', (socket) => {
         room.game.giveCards(info);
 
         var round = room.game.getCurrentRound();
+        if (round.isFixedCards) {
+            console.log("이미 카드 전달 완료!!");
+            return;
+        }
+
         if (!round.checkAllGivingCards()) {
             console.log("아직 카드 전달이 완료가 안 됨");
             return;
@@ -263,12 +268,28 @@ io.on('connection', (socket) => {
         if (room.game.isEnd()) {
             // 게임이 끝났다고 알려줘야됨
             console.log('게임 끝');
+            io.to(room.title).emit('endGame', room.game);
+            delete room.game;
             return;
         }
 
         if (room.game.isRoundOver()) {
             // 라운드만 끝이 났다면
             console.log('라운드 끝');
+            room.game.startRound();
+
+            io.to(room.title).emit('startRound', { 'num' : room.game.rounds.length });
+
+            // 첫 카드 분배
+            console.log(title + ' : card first distribution');
+            var round = room.game.getCurrentRound();
+            round.distributeCardsFirst();
+
+            for (var userId in round.users) {
+                var user = round.users[userId];
+                var data = { 'canCallLargeTichu' : true, 'canCallSmallTichu' : false, 'cardList': user.handCards };
+                io.to(getSocketId(userId)).emit('distribute', data);
+            }
             return;
         }
 
@@ -285,7 +306,33 @@ io.on('connection', (socket) => {
             return;
         }
 
-        room.game.pass();
+        var round = room.game.getCurrentRound();
+        round.pass(name);
+        console.log(round.getCurrentTurnUserId());
+        console.log(round.firstUserId);
+
+        if (round.getCurrentTurnUserId() === round.firstUserId) {
+            // 보상
+            console.log(round.getCurrentTurnUserId());
+            round.rewardPaneCards(round.firstUserId);
+            io.to(room.title).emit('clearPane');
+            console.log(round.users[round.getCurrentTurnUserId()].handCards);
+            if (round.users[round.getCurrentTurnUserId()].handCards.length === 0) {
+                // 비어있다면 
+                console.log("비어있음");
+                for (var i in round.turns) {
+                    var userId = round.turns[i];
+                    if (userId === round.getCurrentTurnUserId()) {
+                        round.skipTurn[i] = true;
+                        round.pass(userId);
+                        console.log(round.getCurrentTurnUserId());
+                        break;
+                    }
+                }
+            }
+        }
+
+        io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
     });
 
     socket.on('chat message', (title, name, msg) => {

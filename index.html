@@ -67,7 +67,7 @@
         <button onclick="passLargeTichu()">라지 티츄 패스</button>
         <button onclick="callSmallTichu()">스몰 티츄</button>
         <button onclick="giveRandomCardsForTest()">자동 카드 분배</button>
-        <button onclick="raiseRandomCardForTest()">한 장 카드 내기</button>
+        <button onclick="raiseRandomCardForTest(7)">정해진 장 수 카드 내기</button>
         <button onclick="pass()">패스</button>
         <div id="container">
             <ul id="messages"></ul>
@@ -176,13 +176,26 @@
                     isMyTurn = userName === name;
                 });
 
+                socket.on('clearPane', () => {
+                    // 판 카드 없앰
+                    console.log('on clearPane');
+                    paneCards = [];
+                });
+
                 socket.on('raiseCards', (data) => {
+                    // 카드 냄
                     console.log('on raiseCards ');
                     console.log(data);
                     if (name === data.name) {
                         myCards = data.cardList;
                     }
                     paneCards = data.paneCardList;
+                });
+
+                socket.on('endGame', (data) => {
+                    // 게임 끝
+                    console.log('on EndGame');
+                    console.log(data);
                 });
 
                 socket.on('roomList', (rooms) => {
@@ -316,14 +329,21 @@
                 socket.emit('giveCards', title, name, datas);
             }
 
-            function raiseRandomCardForTest() {
+            function raiseRandomCardForTest(count) {
                 if (!isMyTurn) {
                     console.log("응 니 차례 아니야~");
                     return;
                 }
 
+                if (myCards.length === 0) {
+                    console.log("더 이상 낼 카드가 없어!!!");
+                    return;
+                }
+
                 var raiseCards = [];
-                raiseCards.push(myCards[0]);
+                for (var i = 0; i < count; i++) {
+                    raiseCards.push(myCards[i]);
+                }
                 console.log('raiseCards 요청');
                 console.log(raiseCards);
                 socket.emit('raiseCards', title, name, raiseCards);
