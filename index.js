@@ -184,7 +184,7 @@ io.on('connection', (socket) => {
 
         for (var userId in round.users) {
             var user = round.users[userId];
-            var data = { 'canCallLargeTichu' : false, 'canCallSmallTichu' : false, 'cardList': user.handCards };
+            var data = { 'canCallLargeTichu' : user.canCallLargeTichu, 'canCallSmallTichu' : user.canCallSmallTichu, 'cardList': user.handCards };
             io.to(getSocketId(userId)).emit('distribute', data);
         }
     });
@@ -232,7 +232,7 @@ io.on('connection', (socket) => {
         round.fixCards();
         for (var userId in round.users) {
             var user = round.users[userId];
-            io.to(getSocketId(userId)).emit('fixCards', { 'name' : userId, 'canCallLargeTichu': false, 'canCallSmallTichu': true, 'cardList': user.handCards });
+            io.to(getSocketId(userId)).emit('fixCards', { 'name' : userId, 'canCallLargeTichu': user.canCallLargeTichu, 'canCallSmallTichu': user.canCallSmallTichu, 'cardList': user.handCards });
         }
 
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
@@ -314,7 +314,11 @@ io.on('connection', (socket) => {
         if (round.getCurrentTurnUserId() === round.firstUserId) {
             // 보상
             console.log(round.getCurrentTurnUserId());
-            round.rewardPaneCards(round.firstUserId);
+            if (round.paneCards[round.paneCards.length - 1][0] === '3_98_0_25') {
+                round.rewardPaneCards(round.getOppositeUserId(room.getCurrentTurnUserId()));
+            } else {
+                round.rewardPaneCards(round.firstUserId);
+            }
             io.to(room.title).emit('clearPane');
             console.log(round.users[round.getCurrentTurnUserId()].handCards);
             if (round.users[round.getCurrentTurnUserId()].handCards.length === 0) {

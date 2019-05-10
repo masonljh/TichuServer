@@ -34,6 +34,7 @@ function Round(users, turns) {
         user.isSmallTichuSuccess = false;
         user.isGivingCards = false;
         user.rank = 0;
+        user.skipTurn = false;
     }
     this.cardContainer = [];
     this.cardContainer.push('0_1_0_0');
@@ -59,6 +60,7 @@ method.callLargeTichu = function(id) {
 
     this.users[id].canCallLargeTichu = false;
     this.users[id].isLargeTichuCalled = true;
+    this.users[id].canCallSmallTichu = false;
 };
 
 method.passLargeTichu = function(id) {
@@ -273,6 +275,7 @@ method.updateOtherSkipTurns = function(id) {
             var turnId = this.turns[i];
             if (turnId === userId) {
                 this.skipTurn[i] = true;
+                this.users[userId].skipTurn = true;
                 break;
             }
         }
@@ -421,6 +424,28 @@ method.getUserCardScore = function(user) {
 
 method.getCurrentTurnUserId = function() {
     return this.currentTurn;
+};
+
+method.getOppositeUserId = function(id) {
+    var team = this.users[id].team;
+    var oppositeUserId;
+    for (var userId in this.users) {
+        if (userId === id) {
+            continue;
+        }
+
+        if (team === this.users[userId].team) {
+            continue;
+        }
+
+        if (oppositeUserId !== null && !this.users[oppositeUserId].skipTurn) {
+            continue;
+        }
+
+        oppositeUserId = userId;
+    }
+
+    return oppositeUserId;
 };
 
 module.exports = Round;
