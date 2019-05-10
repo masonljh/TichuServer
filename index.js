@@ -268,7 +268,7 @@ io.on('connection', (socket) => {
         if (room.game.isEnd()) {
             // 게임이 끝났다고 알려줘야됨
             console.log('게임 끝');
-            io.to(room.title).emit('endGame', room.game);
+            io.to(room.title).emit('endGame', room.game.winnerTeam);
             delete room.game;
             return;
         }
