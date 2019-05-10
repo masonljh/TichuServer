@@ -184,7 +184,7 @@ io.on('connection', (socket) => {
 
         for (var userId in round.users) {
             var user = round.users[userId];
-            var data = { 'canCallLargeTichu' : user.canCallLargeTichu, 'canCallSmallTichu' : user.canCallSmallTichu, 'cardList': user.handCards };
+            var data = { 'canCallLargeTichu' : user.canCallLargeTichu, 'canCallSmallTichu' : false, 'cardList': user.handCards };
             io.to(getSocketId(userId)).emit('distribute', data);
         }
     });
