@@ -232,7 +232,7 @@ io.on('connection', (socket) => {
         round.fixCards();
         for (var userId in round.users) {
             var user = round.users[userId];
-            io.to(getSocketId(userId)).emit('fixCards', { name: userId, 'cardList': user.handCards });
+            io.to(getSocketId(userId)).emit('fixCards', { 'name' : userId, 'canCallLargeTichu': false, 'canCallSmallTichu': true, 'cardList': user.handCards });
         }
 
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
