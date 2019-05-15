@@ -238,7 +238,7 @@ io.on('connection', (socket) => {
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
     });
 
-    socket.on('raiseCards', (title, name, cardList) => {
+    socket.on('raiseCards', (title, name, cardList, isCallNum, num) => {
         console.log('on RaiseCards ' + title + ' / ' + name);
         console.log(cardList);
         var room = rooms[title];
@@ -247,8 +247,17 @@ io.on('connection', (socket) => {
             return;
         }
 
-        room.game.raiseCards(name, cardList);
         var round = room.game.getCurrentRound();
+        if (isContainsNum(cardList, round.restrictNum)) {
+            round.restrictNum = undefined;
+            io.to(room.title).emit('releaseLimit');
+        }
+
+        room.game.raiseCards(name, cardList);
+        if (isCallNum) {
+            round.restrictNum = num;
+        } 
+
         for (var userId in round.users) {
             var user = round.users[userId];
 
@@ -262,6 +271,7 @@ io.on('connection', (socket) => {
                 data.cardList = user.handCards;
             }
 
+            io.to(room.title).emit('callNum', num);
             io.to(getSocketId(userId)).emit('raiseCards', data);
         }
 
@@ -315,7 +325,8 @@ io.on('connection', (socket) => {
             // 보상
             console.log(round.getCurrentTurnUserId());
             if (round.paneCards[round.paneCards.length - 1][0] === '3_98_0_25') {
-                round.rewardPaneCards(round.getOppositeUserId(room.getCurrentTurnUserId()));
+                io.to(getSocketId(round.getCurrentTurnUserId())).emit('toWhom');
+                return;
             } else {
                 round.rewardPaneCards(round.firstUserId);
             }
@@ -337,6 +348,34 @@ io.on('connection', (socket) => {
         }
 
         io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
+    });
+
+    socket.on('giveRewards', (title, name, who) => {
+        console.log('on GiveRewards ' + title + ' / ' + name + ' / ' + who);
+        var room = rooms[title];
+        if (room === undefined) {
+            io.to(socket.id).emit('roomError', 1002);
+            return;
+        }
+
+        var round = room.game.getCurrentRound();
+        round.rewardPaneCards(who);
+        
+        io.to(room.title).emit('clearPane');
+        console.log(round.users[round.getCurrentTurnUserId()].handCards);
+        if (round.users[round.getCurrentTurnUserId()].handCards.length === 0) {
+            // 비어있다면 
+            console.log("비어있음");
+            for (var i in round.turns) {
+                var userId = round.turns[i];
+                if (userId === round.getCurrentTurnUserId()) {
+                    round.skipTurn[i] = true;
+                    round.pass(userId);
+                    console.log(round.getCurrentTurnUserId());
+                    break;
+                }
+            }
+        }
     });
 
     socket.on('chat message', (title, name, msg) => {
@@ -414,6 +453,21 @@ function getRoomList() {
         roomInfoList.push(getRoomInfo(rooms[title]));
     }
     return roomInfoList;
+}
+
+function isContainsNum(cardList, num) {
+    if (!num) {
+        return false;
+    }
+
+    for (var i in cardList) {
+        var cardStrs = cardList[i].split('_');
+        if (cardStrs[1] === num) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 http.listen(PORT, () => {

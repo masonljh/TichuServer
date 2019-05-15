@@ -18,6 +18,7 @@ function Round(users, turns) {
     this.bScore = 0;
     this.isFixedCards = false;
     this.skipTurn = [false, false, false, false];
+    this.restrictNum;
 
     for (var id in users) {
         this.users[id] = {};
