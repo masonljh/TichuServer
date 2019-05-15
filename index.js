@@ -467,7 +467,7 @@ function isContainsNum(cardList, num) {
 
     for (var i in cardList) {
         var cardStrs = cardList[i].split('_');
-        if (cardStrs[1] === num) {
+        if (Number.parseInt(cardStrs[1]) === num) {
             return true;
         }
     }
