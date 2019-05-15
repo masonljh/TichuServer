@@ -308,6 +308,7 @@ io.on('connection', (socket) => {
         console.log('턴 넘어감');
         if (isContainsNum(cardList, 99)) {
             // 개가 있다면
+            io.to(room.title).emit('clearPane');
             round.jumpTurnIfMyTeamIsRemain(name);
         }
         io.to(room.title).emit('turn', round.getCurrentTurnUserId());
