@@ -368,6 +368,7 @@ io.on('connection', (socket) => {
         round.rewardPaneCards(who);
         
         io.to(room.title).emit('clearPane');
+        round.currentTurn = name;
         console.log(round.users[round.getCurrentTurnUserId()].handCards);
         if (round.users[round.getCurrentTurnUserId()].handCards.length === 0) {
             // 비어있다면 
@@ -382,6 +383,8 @@ io.on('connection', (socket) => {
                 }
             }
         }
+
+        io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
     });
 
     socket.on('chat message', (title, name, msg) => {
