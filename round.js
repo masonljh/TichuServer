@@ -389,7 +389,7 @@ method.updateTotalScore = function() {
 
     if (firstUser.team === thirdUser.team) {
         // 1등, 3등이 같은 팀
-        var score = getUserCardScore(secondUser);
+        var score = this.getUserCardScore(secondUser);
         if (firstUser.team === 'a') {
             this.aScore += (100 - score);
             this.bScore += score;
@@ -401,7 +401,7 @@ method.updateTotalScore = function() {
     }
 
     // 1등, 4등이 같은 팀
-    var score = getUserCardScore(firstUser);
+    var score = this.getUserCardScore(firstUser);
     if (firstUser.team === 'a') {
         this.aScore += score;
         this.bScore += (100 - score);

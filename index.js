@@ -248,6 +248,11 @@ io.on('connection', (socket) => {
         }
 
         var round = room.game.getCurrentRound();
+        if (round.getCurrentTurnUserId() !== name) {
+            console.log('내 차례가 아님');
+            return;
+        }
+
         if (isContainsNum(cardList, round.restrictNum)) {
             console.log('제한 해제');
             round.restrictNum = undefined;
@@ -323,6 +328,11 @@ io.on('connection', (socket) => {
         }
 
         var round = room.game.getCurrentRound();
+        if (round.getCurrentTurnUserId() !== name) {
+            console.log('내 차례가 아님');
+            return;
+        }
+
         round.pass(name);
         console.log(round.getCurrentTurnUserId());
         console.log(round.firstUserId);
