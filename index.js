@@ -256,6 +256,7 @@ io.on('connection', (socket) => {
         room.game.raiseCards(name, cardList);
         if (isCallNum) {
             round.restrictNum = num;
+            io.to(room.title).emit('callNum', num);
         } 
 
         for (var userId in round.users) {
@@ -271,7 +272,6 @@ io.on('connection', (socket) => {
                 data.cardList = user.handCards;
             }
 
-            io.to(room.title).emit('callNum', num);
             io.to(getSocketId(userId)).emit('raiseCards', data);
         }
 
