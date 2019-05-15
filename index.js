@@ -249,12 +249,14 @@ io.on('connection', (socket) => {
 
         var round = room.game.getCurrentRound();
         if (isContainsNum(cardList, round.restrictNum)) {
+            console.log('제한 해제');
             round.restrictNum = undefined;
             io.to(room.title).emit('releaseLimit');
         }
 
         room.game.raiseCards(name, cardList);
-        if (isCallNum) {
+        if (isCallNum === true) {
+            console.log('제한 생성 - ' + num);
             round.restrictNum = num;
             io.to(room.title).emit('callNum', num);
         }
