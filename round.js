@@ -427,26 +427,19 @@ method.getCurrentTurnUserId = function() {
     return this.currentTurn;
 };
 
-method.getOppositeUserId = function(id) {
+method.jumpTurnIfMyTeamIsRemain = function(id) {
     var team = this.users[id].team;
-    var oppositeUserId;
-    for (var userId in this.users) {
-        if (userId === id) {
+    for (var idx in this.users) {
+        var user = this.users[idx];
+        if (idx === id) {
             continue;
         }
 
-        if (team === this.users[userId].team) {
-            continue;
+        if (team === user.team && user.handCards.length > 0) {
+            this.currentTurn = idx;
+            return;
         }
-
-        if (oppositeUserId !== null && !this.users[oppositeUserId].skipTurn) {
-            continue;
-        }
-
-        oppositeUserId = userId;
     }
-
-    return oppositeUserId;
 };
 
 module.exports = Round;

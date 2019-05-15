@@ -257,7 +257,7 @@ io.on('connection', (socket) => {
         if (isCallNum) {
             round.restrictNum = num;
             io.to(room.title).emit('callNum', num);
-        } 
+        }
 
         for (var userId in round.users) {
             var user = round.users[userId];
@@ -292,7 +292,6 @@ io.on('connection', (socket) => {
 
             // 첫 카드 분배
             console.log(title + ' : card first distribution');
-            var round = room.game.getCurrentRound();
             round.distributeCardsFirst();
 
             for (var userId in round.users) {
@@ -305,7 +304,11 @@ io.on('connection', (socket) => {
 
         // 라운드도 끝이 안 났다면
         console.log('턴 넘어감');
-        io.to(room.title).emit('turn', room.game.getCurrentRound().getCurrentTurnUserId());
+        if (isContainsNum(cardList, 99)) {
+            // 개가 있다면
+            round.jumpTurnIfMyTeamIsRemain(name);
+        }
+        io.to(room.title).emit('turn', round.getCurrentTurnUserId());
     });
 
     socket.on('pass', (title, name) => {
