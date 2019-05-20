@@ -117,7 +117,7 @@
                     scrollToBottom();
                 });
                 
-                socket.on('leaveRoom', (roomTitle, userName) => {
+                socket.on('leave', (roomTitle, userName) => {
                     if (userName === name) {
                         title = '로비';
                         updateTitle();
