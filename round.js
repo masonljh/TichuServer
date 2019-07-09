@@ -174,6 +174,18 @@ method.fixCards = function() {
     }
 };
 
+method.getNextTurnUserIdWithoutSkip = function() {
+    for (var i in this.turns) {
+        var userId = this.turns[i];
+        if (userId === this.currentTurn) {
+            var nextTurnIdx = Number.parseInt(i) === this.turns.length - 1 ? 0 : Number.parseInt(i) + 1;
+            return this.turns[nextTurnIdx];
+        }
+    }
+
+    return this.currentTurn;
+}
+
 method.getNextTurnUserId = function() {
     var nextTurnId;
     while (true) {
@@ -234,7 +246,12 @@ method.raiseCards = function(id, cardIds) {
     }
 
     this.paneCards.push(cardIds);
+
     this.updateOtherSkipTurns(id);
+    if (cardIds.length === 1 && cardIds[0] === '1_99_0_0') {
+        this.currentTurn = this.getNextTurnUserIdWithoutSkip();
+    }
+    
     this.currentTurn = this.getNextTurnUserId();
 
     // console.log(this.users[id].handCards);
