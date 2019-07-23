@@ -25,6 +25,7 @@ io.on('connection', (socket) => {
     console.log('a user connected');
     socket.on('setName', (name) => {
         for (var socketId in users) {
+            console.log(name + ' / ' + users[socketId]);
             if (name === users[socketId]) {
                 io.to(socket.id).emit('nameError', 1007);
                 return;
