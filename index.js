@@ -270,12 +270,11 @@ io.on('connection', (socket) => {
 
         for (var userId in round.users) {
             var user = round.users[userId];
-            console.log(userId + ' / ' + user.handCards.length);
 
             var data = {
-                name: userId,
+                name: name,
                 paneCardList : round.paneCards,
-                cardCnt : user.handCards.length
+                cardCnt : round.users[name].handCards.length
             };
 
             if (userId === name) {
