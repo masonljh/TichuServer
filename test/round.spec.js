@@ -378,6 +378,32 @@ describe('# Round Test', () => {
             assert.equal(round.paneCards[0].length, 1);
             assert.equal(round.paneCards[0][0], cardId);
         });
+
+        it('should remain 8 when raise 6 cards', () => {
+            // given
+            var users = getDummyUsers();
+            var round = new Round(users, getDummyTurns());
+            round.distributeCardsFirst();
+            round.distributeCardsSecond();
+            round.giveCards(getDummyGiveData(round, 'abc', ['def', 'ghi', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'def', ['abc', 'ghi', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'ghi', ['abc', 'def', 'jkl']));
+            round.giveCards(getDummyGiveData(round, 'jkl', ['abc', 'def', 'ghi']));
+            round.fixCards();
+            var currentTurnId = round.getCurrentTurnUserId();
+            var cardId = round.users[currentTurnId].handCards[0];
+
+            // when
+            round.raiseCards(currentTurnId, [ round.users[currentTurnId].handCards[0], round.users[currentTurnId].handCards[1], round.users[currentTurnId].handCards[2], round.users[currentTurnId].handCards[3], round.users[currentTurnId].handCards[4], round.users[currentTurnId].handCards[5] ]);
+
+            // @TODO : (jonghyo) 여러 장 낼 때도 체크 필요
+
+            // then
+            assert.equal(round.users[currentTurnId].handCards.length, 8);
+            assert.equal(round.paneCards.length, 1);
+            assert.equal(round.paneCards[0].length, 6);
+            assert.equal(round.paneCards[0][0], cardId);
+        });
     });
 
     describe('# checkEmptyHand', () => {
