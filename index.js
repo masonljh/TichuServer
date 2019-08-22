@@ -270,7 +270,7 @@ io.on('connection', (socket) => {
 
         for (var userId in round.users) {
             var user = round.users[userId];
-            console.log(name + ' / ' + user.handCards.length);
+            console.log(userId + ' / ' + user.handCards.length);
 
             var data = {
                 name: userId,
