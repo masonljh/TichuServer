@@ -273,7 +273,7 @@ io.on('connection', (socket) => {
             console.log(name + ' / ' + user.handCards.length);
 
             var data = {
-                name: name,
+                name: userId,
                 paneCardList : round.paneCards,
                 cardCnt : user.handCards.length
             };
