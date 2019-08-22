@@ -262,7 +262,6 @@ io.on('connection', (socket) => {
         }
 
         room.game.raiseCards(name, cardList);
-        console.log(name + ' / ' + round.users[name].handCards.length);
         if (isCallNum === true) {
             console.log('제한 생성 - ' + num);
             round.restrictNum = num;
@@ -271,6 +270,7 @@ io.on('connection', (socket) => {
 
         for (var userId in round.users) {
             var user = round.users[userId];
+            console.log(name + ' / ' + user.handCards.length);
 
             var data = {
                 name: name,
