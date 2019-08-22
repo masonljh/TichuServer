@@ -262,6 +262,7 @@ io.on('connection', (socket) => {
         }
 
         room.game.raiseCards(name, cardList);
+        console.log(name + ' / ' + round.users[name].handCards.length);
         if (isCallNum === true) {
             console.log('제한 생성 - ' + num);
             round.restrictNum = num;
@@ -295,6 +296,8 @@ io.on('connection', (socket) => {
         if (room.game.isRoundOver()) {
             // 라운드만 끝이 났다면
             console.log('라운드 끝');
+            console.log(room.game.rounds.length + ' / ' + room.game.getCurrentRound().aScore + ' / ' + room.game.getCurrentRound().bScore);
+
             room.game.startRound();
 
             io.to(room.title).emit('startRound', { 'num' : room.game.rounds.length });
