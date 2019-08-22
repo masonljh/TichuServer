@@ -301,6 +301,7 @@ io.on('connection', (socket) => {
 
             // 첫 카드 분배
             console.log(title + ' : card first distribution');
+            round = room.game.getCurrentRound();
             round.distributeCardsFirst();
 
             for (var userId in round.users) {
