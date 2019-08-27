@@ -322,7 +322,7 @@ method.updateRank = function(id, rank) {
 };
 
 method.isOver = function() {
-    if (this.currentRank == 2) {
+    if (this.currentRank == 3) {
         var isOneTwoTeam;
         for (var userId in this.users) {
             var user = this.users[userId];
