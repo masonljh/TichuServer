@@ -28,6 +28,10 @@ method.isWaiting = function() {
     return this.state === 0;
 }
 
+method.isMember = function(id) {
+    return this.users[id] !== undefined && this.users[id].isConnecting;
+};
+
 method.isFull = function(id) {
     return this.aCnt + this.bCnt === 4;
 };

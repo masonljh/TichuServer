@@ -80,6 +80,10 @@ io.on('connection', (socket) => {
             return;
         }
 
+        if (room.isMember(name)) {
+            return;
+        }
+
         room.joinUser(name, socket.id);
 
         socket.join(room.title, () => {
