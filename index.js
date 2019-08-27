@@ -287,6 +287,7 @@ io.on('connection', (socket) => {
         if (room.game.isEnd()) {
             // 게임이 끝났다고 알려줘야됨
             console.log('게임 끝');
+            io.to(room.title).emit('endRound', { 'num': room.game.rounds.length, 'aScore': room.game.getCurrentRound().aScore, 'bScore': room.game.getCurrentRound().bScore });
             io.to(room.title).emit('endGame', room.game.winnerTeam);
             delete room.game;
             return;
@@ -295,7 +296,8 @@ io.on('connection', (socket) => {
         if (room.game.isRoundOver()) {
             // 라운드만 끝이 났다면
             console.log('라운드 끝');
-            console.log(room.game.rounds.length + ' / ' + room.game.getCurrentRound().aScore + ' / ' + room.game.getCurrentRound().bScore);
+            console.log(room.title + ' / ' + room.game.rounds.length + ' / ' + room.game.getCurrentRound().aScore + ' / ' + room.game.getCurrentRound().bScore);
+            io.to(room.title).emit('endRound', { 'num': room.game.rounds.length, 'aScore': room.game.getCurrentRound().aScore, 'bScore': room.game.getCurrentRound().bScore });
 
             room.game.startRound();
 
