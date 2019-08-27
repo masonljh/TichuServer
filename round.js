@@ -322,6 +322,23 @@ method.updateRank = function(id, rank) {
 };
 
 method.isOver = function() {
+    if (this.currentRank == 2) {
+        var isOneTwoTeam;
+        for (var userId in this.users) {
+            var user = this.users[userId];
+            if (this.checkEmptyHand(userId)) {
+                if (isOneTwoTeam === undefined) {
+                    isOneTwoTeam = user.team;
+                    continue;
+                }
+
+                if (isOneTwoTeam === user.team) {
+                    return true;
+                }
+            }
+        }
+    }
+
     if (this.currentRank < 4) {
         return false;
     }
